@@ -2590,6 +2590,7 @@ function montarGaleria(p) {
      última terminar. É a diferença entre uma página que vai
      chegando e uma que trava.                                  */
   const MAX_FOTOS = 6;
+  const FILAS = 2;      // quantas fotos baixam ao mesmo tempo
 
   function carregar(tamanho) {
     const base = tamanho ? `${p.id}-${tamanho.apelido}` : p.id;
@@ -2628,7 +2629,7 @@ function montarGaleria(p) {
        não existe. Não sobra nenhum pedido desperdiçado atrás
        dela, como acontecia quando as seis saíam juntas.        */
     const proximaVaga = (n) => {
-      if (n > MAX_FOTOS) return;
+      if (n > MAX_FOTOS || n > ultimaBoa) return;
       const sufixo = n === 1 ? '' : `-${n}`;
       const posicao = n - 1;
       let tentativa = 0;
@@ -2651,7 +2652,7 @@ function montarGaleria(p) {
           botao.classList.add('escolhida');
         }
         redesenhar();
-        proximaVaga(n + 1);        // achou esta, vai buscar a seguinte
+        proximaVaga(n + FILAS);    // achou esta, vai buscar a próxima da mesma fila
       });
 
       // Não achou nesta extensão? tenta a próxima. Acabaram as
@@ -2675,7 +2676,21 @@ function montarGaleria(p) {
       foto.src = `fotos/${base}${sufixo}.${EXTENSOES[tentativa++]}`;
     };
 
-    proximaVaga(1);
+    // DUAS FILAS, e o número dois é medido, não chutado.
+    //
+    // Com UMA fila, cada foto espera a anterior terminar — e no
+    // servidor de verdade, longe daqui, cada pedido custa meio
+    // segundo só de ida e volta. As quatro fotos do sérum
+    // levavam 3 segundos pra completar.
+    //
+    // Com SEIS filas (todas de uma vez), elas dividem a banda do
+    // celular e chegam empilhadas no fim: a cliente encara um
+    // vazio e depois tudo aparece junto.
+    //
+    // Duas filas pegam o melhor dos dois: enquanto uma foto
+    // baixa, a próxima já está pedindo. A primeira aparece cedo e
+    // o total cai pela metade.
+    for (let i = 1; i <= FILAS; i++) proximaVaga(i);
   }
 
   carregar(p.tamanhos[0] || null);
