@@ -2329,16 +2329,29 @@ function existeImagem(caminho) {
 async function fotosDoProduto(p) {
   if (p.galeria) return p.galeria;      // já procurou uma vez, não procura de novo
   const lista = [];
-  const principal = p.el.querySelector('.moldura img');
-  if (principal) lista.push(principal.getAttribute('src'));
 
-  for (let n = 2; n <= 8; n++) {
+  /* A CONTAGEM COMEÇA NA PRINCIPAL, e essa escolha tem história.
+
+     Antes esta função pegava a foto principal pronta do card e só
+     procurava da -2 em diante. Funcionava no clique — e falhava
+     em quem chegasse pelo LINK DIRETO de um produto (que é
+     justamente como a cliente chega, pelo link que ela mandou no
+     zap). Motivo: nesse caminho a janela abre no carregamento da
+     página, antes de a foto do card ter sido encontrada. A
+     galeria então nascia sem a primeira foto: quem clicava via
+     quatro, quem vinha pelo link via três.
+
+     Agora a procura é a mesma pros dois caminhos: n=1 é a foto
+     sem número, n=2 em diante são as outras. Custa nada, porque
+     a principal já está no cache do navegador.                  */
+  for (let n = 1; n <= 8; n++) {
+    const sufixo = n === 1 ? '' : `-${n}`;
     let achada = null;
     for (const ext of EXTENSOES) {
-      const caminho = `fotos/${p.id}-${n}.${ext}`;
+      const caminho = `fotos/${p.id}${sufixo}.${ext}`;
       if (await existeImagem(caminho)) { achada = caminho; break; }
     }
-    if (!achada) break;
+    if (!achada) break;    // buraco na sequência: a galeria para aqui
     lista.push(achada);
   }
   p.galeria = lista;
@@ -2372,6 +2385,15 @@ function montarGaleria(p) {
   // As miniaturas chegam depois, quando a procura terminar. A
   // janela não espera por elas: a foto principal já está na tela.
   fotosDoProduto(p).then((fotos) => {
+    if (!fotos.length) return;
+    // Se a janela abriu antes de a foto principal ter sido
+    // encontrada (é o caso de quem chega pelo link do produto),
+    // ela entra agora, no lugar do recadinho "foto do produto".
+    if (!grande.src) {
+      grande.src = fotos[0];
+      palco.classList.add('com-foto');
+      palco.replaceChildren(grande);
+    }
     if (fotos.length < 2) return;       // uma foto só não é galeria
     tiras.replaceChildren(...fotos.map((caminho, i) => {
       const b = document.createElement('button');
