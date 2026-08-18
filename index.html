@@ -2535,139 +2535,12 @@ function lerTamanhos(texto) {
    você tiver a -2 e a -4 mas esquecer a -3, a -4 não vai
    aparecer. É de propósito — assim a galeria nunca tem buraco.
 
-   E repare QUANDO isto roda: só no clique, quando a janela abre.
-   Se as outras fotos fossem procuradas no carregamento da
-   página, cada produto pediria uma dúzia de imagens que quase
-   ninguém ia ver — e a vitrine, que é o que importa, demoraria
-   mais pra aparecer no celular da cliente.                      */
-/* "ESSA FOTO EXISTE?" — DE DOIS JEITOS, E O MOTIVO IMPORTA.
-
-   O jeito antigo era criar uma <img> escondida e ver se ela
-   carregava. Funciona em qualquer lugar, inclusive com o arquivo
-   aberto direto do computador. Só que ele BAIXA A FOTO INTEIRA
-   só pra responder "sim" ou "não" — e a resposta demora o tempo
-   de baixar uns 70 KB. Com quatro fotos no 4G, era mais de um
-   segundo esperando por uma pergunta que é sim/não.
-
-   O jeito novo é o método HEAD: ele pede ao servidor só a
-   ETIQUETA do arquivo, sem o conteúdo. A resposta são uns poucos
-   bytes e volta na hora. Aí as fotos de verdade entram como
-   <img loading="lazy">, e o navegador baixa cada uma quando ela
-   for aparecer — na ordem que ele achar melhor, mostrando uma
-   por uma em vez de todas juntas no fim.
-
-   E por que o jeito antigo continua aqui? Porque o HEAD é um
-   pedido de REDE, e não existe rede quando o arquivo é aberto
-   pelo "file:///" — ali o fetch estoura. Então a gente tenta o
-   rápido e, se ele não puder rodar, cai no que sempre funciona.
-   É o mesmo princípio do resto do arquivo: o caminho bom quando
-   dá, o caminho garantido sempre.                              */
-async function existeImagem(caminho) {
-  try {
-    const r = await fetch(caminho, { method: 'HEAD' });
-    return r.ok;
-  } catch {
-    return new Promise((responde) => {
-      const teste = new Image();
-      teste.onload = () => responde(true);
-      teste.onerror = () => responde(false);
-      teste.src = caminho;
-    });
-  }
-}
-
-async function fotosDoProduto(p, tamanho) {
-  // Produto com tamanhos procura primeiro as fotos DAQUELE pote
-  // (fotos/id-110ml.jpg). Não achando, cai nas fotos normais —
-  // assim dá pra ter foto separada só de um tamanho, ou de
-  // nenhum, sem o site quebrar.
-  const base = tamanho ? `${p.id}-${tamanho.apelido}` : p.id;
-  p.galerias = p.galerias || {};
-
-  /* GUARDAR A PROMESSA, NÃO O RESULTADO.
-     Parece um detalhe e não é. Ao abrir um produto com tamanhos,
-     esta função era chamada DUAS vezes quase ao mesmo tempo: uma
-     pela galeria ao nascer, outra pela escolha do primeiro
-     tamanho. Guardando só o resultado, a segunda chamada chegava
-     antes de a primeira terminar, via a gaveta ainda vazia e
-     saía procurando tudo de novo — o dobro dos pedidos de rede
-     pra descobrir exatamente a mesma coisa.
-     Guardando a PROMESSA, a segunda chamada encontra a procura
-     já em andamento e simplesmente espera por ela.             */
-  if (p.galerias[base]) return p.galerias[base];
-  p.galerias[base] = (async () => {
-
-  /* PERGUNTAR TUDO DE UMA VEZ, EM VEZ DE UM DE CADA VEZ.
-
-     A primeira versão disto era uma fila indiana: perguntava pela
-     foto 2, esperava a resposta, perguntava pela 3, esperava... e
-     pra saber que a galeria tinha acabado, testava as quatro
-     extensões da vaga seguinte, uma de cada vez. Numa galeria de
-     quatro fotos davam SETE idas e voltas até a rede, quatro
-     delas só pra ouvir "não existe".
-
-     No computador com internet boa isso não aparece. No 4G, cada
-     ida e volta custa uns 300 ms — e as miniaturas demoravam
-     QUATRO SEGUNDOS pra aparecer. A foto grande estava lá em
-     75 ms (ela vem do card, já carregada), então dava aquela
-     sensação esquisita de página meio pronta.
-
-     Agora as seis vagas são perguntadas ao mesmo tempo. O
-     navegador dispara tudo junto e a resposta chega numa ida só.
-
-     Por que só .jpg na primeira leva? Porque perguntar as quatro
-     extensões de seis vagas seriam 24 pedidos, quase todos "não
-     existe" — rápido, mas um desperdício de dados no celular da
-     cliente. O .jpg é o que a instrução manda usar, então ele
-     acerta de primeira em quase todo caso; as outras extensões
-     ficam pra segunda leva, que só acontece se precisar.       */
-  const MAX = 6;
-  const vagas = await Promise.all(
-    Array.from({ length: MAX }, (_, i) => acharFoto(base, i + 1, true))
-  );
-
-  /* SEGUNDA LEVA: confirmar o buraco.
-     Uma vaga vazia na primeira leva pode ser uma foto .png em vez
-     de .jpg. Antes de aceitar que a galeria acabou ali, a gente
-     confere aquela vaga nas outras extensões. Sem isto, quem
-     salvasse as fotos em .png veria a galeria parar sem motivo —
-     e não teria como adivinhar o porquê.                        */
-  for (let i = 0; i < MAX; i++) {
-    if (vagas[i]) continue;
-    vagas[i] = await acharFoto(base, i + 1, false);
-    if (!vagas[i]) break;       // agora sim: acabou de verdade
-  }
-
-  const lista = [];
-  for (const vaga of vagas) {
-    if (!vaga) break;           // buraco na sequência: a galeria para aqui
-    lista.push(vaga);
-  }
-
-  // Tamanho sem foto própria usa as fotos normais do produto, em
-  // vez de ficar sem foto nenhuma.
-  if (!lista.length && tamanho) return fotosDoProduto(p, null);
-
-  return lista;
-  })();
-  return p.galerias[base];
-}
-
-/* Procura UMA vaga da galeria, testando as extensões ao mesmo
-   tempo e ficando com a de maior prioridade que existir — a
-   ordem do EXTENSOES manda, não quem responder primeiro. Senão a
-   foto que aparece dependeria de qual resposta chegou antes, o
-   que muda a cada carregamento. */
-async function acharFoto(base, n, soJpg) {
-  const sufixo = n === 1 ? '' : `-${n}`;
-  // Na segunda leva o .jpg é pulado: a primeira leva já perguntou
-  // por ele e ouviu não. Perguntar de novo é um pedido jogado fora.
-  const extensoes = soJpg ? ['jpg'] : EXTENSOES.filter(e => e !== 'jpg');
-  const caminhos = extensoes.map(ext => `fotos/${base}${sufixo}.${ext}`);
-  const existem = await Promise.all(caminhos.map(existeImagem));
-  const i = existem.findIndex(Boolean);
-  return i === -1 ? null : caminhos[i];
-}
+   Quem faz essa procura é a própria galeria, logo abaixo, pedindo
+   as fotos uma a uma. Aqui já moraram três funções que
+   perguntavam "esta foto existe?" antes de pedir qualquer coisa;
+   elas foram embora quando a galeria passou a simplesmente pedir
+   e lidar com o que não vier. Perguntar antes custava uma volta
+   inteira de rede antes de a primeira foto começar a baixar.   */
 
 function montarGaleria(p) {
   const galeria = document.createElement('div');
@@ -2693,36 +2566,116 @@ function montarGaleria(p) {
   tiras.className = 'galeria-miniaturas';
   galeria.append(palco, tiras);
 
-  // As miniaturas chegam depois, quando a procura terminar. A
-  // janela não espera por elas: a foto principal já está na tela.
-  // A função devolve um "trocar", que a escolha de tamanho chama
-  // pra recarregar a galeria com as fotos do outro pote.
-  function carregar(tamanho) {
-    fotosDoProduto(p, tamanho).then((fotos) => {
-      if (!fotos.length) return;
-      // A primeira foto entra sempre. Isso cobre dois casos: a
-      // janela ter aberto antes de a foto do card ser encontrada
-      // (quem chega pelo link do produto), e a troca de tamanho.
-      grande.src = fotos[0];
-      palco.classList.add('com-foto');
-      if (!palco.contains(grande)) palco.replaceChildren(grande);
+  /* A GALERIA PEDE AS FOTOS DE UMA VEZ, SEM PERGUNTAR ANTES.
 
-      tiras.replaceChildren();
-      if (fotos.length < 2) return;       // uma foto só não é galeria
-      tiras.replaceChildren(...fotos.map((caminho, i) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'mini' + (i === 0 ? ' escolhida' : '');
-        b.setAttribute('aria-label', `Ver foto ${i + 1} de ${fotos.length}`);
-        b.innerHTML = `<img src="${caminho}" alt="" loading="lazy">`;
-        b.addEventListener('click', () => {
-          grande.src = caminho;
-          tiras.querySelectorAll('.mini').forEach(m => m.classList.remove('escolhida'));
-          b.classList.add('escolhida');
-        });
-        return b;
-      }));
-    });
+     Esta é a terceira versão desta função, e a diferença entre
+     elas é onde mora a espera.
+
+     A primeira perguntava "existe a foto 2?", esperava, "existe a
+     3?", esperava. A segunda passou a perguntar por todas ao
+     mesmo tempo, e por HEAD, que é uma pergunta baratinha. Ficou
+     três vezes mais rápida — e ainda assim as fotos só COMEÇAVAM
+     a baixar quase um segundo depois do clique, porque a pergunta
+     estava na frente do trabalho.
+
+     Agora não há pergunta. A galeria cria as seis vagas e manda
+     baixar tudo na hora. Cada vaga nasce escondida e só aparece
+     quando a foto dela chega; a que não existir se apaga sozinha,
+     e apaga as de depois junto, pra galeria nunca ficar com
+     buraco no meio.
+
+     O ganho não é de milissegundos no total — os bytes são os
+     mesmos. O ganho é que a primeira foto aparece assim que ela
+     chega, em vez de a cliente olhar pra um espaço vazio até a
+     última terminar. É a diferença entre uma página que vai
+     chegando e uma que trava.                                  */
+  const MAX_FOTOS = 6;
+
+  function carregar(tamanho) {
+    const base = tamanho ? `${p.id}-${tamanho.apelido}` : p.id;
+    const vagas = [];          // { botao, caminho } por posição
+    let ultimaBoa = MAX_FOTOS; // até onde a galeria vai
+    tiras.replaceChildren();
+
+    // Redesenha a fita mostrando só as vagas que já chegaram, em
+    // ordem e sem buraco. Roda de novo a cada foto que chega.
+    const redesenhar = () => {
+      const boas = [];
+      for (let i = 0; i < ultimaBoa; i++) {
+        if (!vagas[i]) break;
+        boas.push(vagas[i]);
+      }
+      // Uma foto só não é galeria: não vale mostrar uma miniatura
+      // sozinha embaixo da foto grande, repetindo a mesma imagem.
+      tiras.replaceChildren(...(boas.length > 1 ? boas.map(v => v.botao) : []));
+      boas.forEach((v, i) => v.botao.setAttribute('aria-label', `Ver foto ${i + 1} de ${boas.length}`));
+    };
+
+    /* UMA DE CADA VEZ, EM FILA — e desta vez a fila é a escolha
+       certa, ao contrário da primeira versão desta função.
+
+       Pedir as seis de uma vez parece mais rápido, mas a internet
+       do celular tem uma largura só: seis fotos baixando juntas
+       dividem a mesma banda e chegam TODAS no fim, juntas. A
+       cliente encara um vazio e depois tudo aparece de uma vez.
+
+       Em fila, cada foto usa a banda inteira e chega na hora:
+       a primeira aparece em um quarto do tempo, e as outras vão
+       entrando enquanto ela já está olhando. O tempo total é o
+       mesmo — a sensação, não.
+
+       E tem um bônus: a fila para sozinha na primeira vaga que
+       não existe. Não sobra nenhum pedido desperdiçado atrás
+       dela, como acontecia quando as seis saíam juntas.        */
+    const proximaVaga = (n) => {
+      if (n > MAX_FOTOS) return;
+      const sufixo = n === 1 ? '' : `-${n}`;
+      const posicao = n - 1;
+      let tentativa = 0;
+
+      const botao = document.createElement('button');
+      botao.type = 'button';
+      botao.className = 'mini';
+      const foto = document.createElement('img');
+      foto.alt = '';
+      botao.appendChild(foto);
+
+      foto.addEventListener('load', () => {
+        vagas[posicao] = { botao };
+        // A primeira foto também é a grande — e ela entra assim
+        // que chega, cobrindo quem abriu pelo link do produto.
+        if (posicao === 0) {
+          grande.src = foto.getAttribute('src');
+          palco.classList.add('com-foto');
+          if (!palco.contains(grande)) palco.replaceChildren(grande);
+          botao.classList.add('escolhida');
+        }
+        redesenhar();
+        proximaVaga(n + 1);        // achou esta, vai buscar a seguinte
+      });
+
+      // Não achou nesta extensão? tenta a próxima. Acabaram as
+      // extensões, a vaga não existe: a galeria termina antes dela
+      // e a fila para — ninguém procura a de número seguinte.
+      foto.addEventListener('error', () => {
+        if (tentativa < EXTENSOES.length) {
+          foto.src = `fotos/${base}${sufixo}.${EXTENSOES[tentativa++]}`;
+          return;
+        }
+        ultimaBoa = Math.min(ultimaBoa, posicao);
+        redesenhar();
+      });
+
+      botao.addEventListener('click', () => {
+        grande.src = foto.getAttribute('src');
+        tiras.querySelectorAll('.mini').forEach(m => m.classList.remove('escolhida'));
+        botao.classList.add('escolhida');
+      });
+
+      foto.src = `fotos/${base}${sufixo}.${EXTENSOES[tentativa++]}`;
+    };
+
+    proximaVaga(1);
   }
 
   carregar(p.tamanhos[0] || null);
