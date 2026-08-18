@@ -344,7 +344,36 @@
       }
       .marca{ width: auto; justify-content: flex-start; font-size: 19px; }
       .logo-topo{ width: 32px; height: 32px; }
-      .topo nav{ display: none; }
+      /* O MENU VOLTA NO CELULAR — mas só os links, sem o botão.
+
+         Ele tinha sumido junto com o botão do WhatsApp, e isso
+         deixou um buraco: sem menu, a única forma de chegar em
+         "A curadoria" e "Sobre" era rolar a vitrine INTEIRA até o
+         rodapé. Com 6 produtos dá pra aguentar. Com 40, aquelas
+         duas seções viram lugares que ninguém mais visita.
+
+         O que mudou pra caber: o cabeçalho não fica mais grudado
+         no topo no celular. Antes, cada pixel dele era um pixel
+         roubado da vitrine em TODA rolagem — por isso valia cortar
+         tudo. Agora ele aparece uma vez, na chegada, e vai embora.
+         Um menu que custa uma vez é barato; o mesmo menu custando
+         o tempo todo era caro. A regra não mudou de opinião: a
+         conta é que mudou.
+
+         O botão do WhatsApp continua fora, porque aquele era
+         repetição de verdade — o botão verde flutuante faz a
+         mesma coisa e acompanha a rolagem. */
+      .topo nav{ margin-left: auto; gap: 14px; }
+      .topo nav a{ font-size: 13.5px; }
+      .topo nav a.zap-topo{ display: none; }
+    }
+
+    /* Telas bem estreitas (iPhone SE e parecidos): "Produtos" sai
+       do menu. Ele é o link mais dispensável dos três — a vitrine
+       começa logo abaixo do cabeçalho e o botão grande do hero já
+       leva pra lá. Os dois que apontam pra LONGE ficam. */
+    @media (max-width: 374px){
+      .topo nav a[href="#catalogo"]{ display: none; }
     }
 
     /* ==========================================================
