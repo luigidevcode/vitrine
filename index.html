@@ -283,12 +283,25 @@
     .zap-topo svg{ width: 16px; height: 16px; fill: currentColor; }
     .topo nav a.zap-topo:hover{ background: var(--marrom-hover); color: var(--branco); }
 
-    /* CELULAR: o cabeçalho vira UMA linha só — logo à esquerda,
-       botão do WhatsApp à direita. Os links "A curadoria" e
-       "Sobre" saem daqui e continuam acessíveis no rodapé: num
+    /* CELULAR: o cabeçalho vira só a logo e o nome da loja.
+
+       O MENU INTEIRO SAI — inclusive o botão do WhatsApp. Não é
+       economia de espaço, é economia de REPETIÇÃO: na primeira
+       tela do celular apareciam três caminhos pro mesmo lugar (o
+       botão do topo, o "Falar comigo" do hero e o botão verde
+       flutuante), os três abrindo a mesma conversa com a mesma
+       mensagem. Três portas pra mesma sala não são três vezes
+       mais convite — são três vezes mais barulho.
+
+       Ficou o flutuante, que é o melhor dos três: ele acompanha a
+       rolagem em vez de existir só nos primeiros pixels. Os links
+       "A curadoria" e "Sobre" continuam acessíveis no rodapé; num
        celular a navegação de verdade é a vitrine, logo abaixo.
 
-       E A MUDANÇA MAIS IMPORTANTE: no celular o cabeçalho DEIXA
+       No monitor grande nada disso muda: lá o menu tem espaço de
+       sobra e o botão faz parte da barra de navegação.
+
+       E A OUTRA MUDANÇA IMPORTANTE: no celular o cabeçalho DEIXA
        de ficar grudado e rola junto com a página.
 
        Por quê? Antes ficavam duas barras coladas no alto o tempo
@@ -313,11 +326,7 @@
       }
       .marca{ width: auto; justify-content: flex-start; font-size: 19px; }
       .logo-topo{ width: 32px; height: 32px; }
-      .topo nav{ margin-left: auto; gap: 0; }
-      .topo nav a:not(.zap-topo){ display: none; }
-      .topo nav a.zap-topo{
-        display: inline-flex; padding: 8px 14px; font-size: 13px; gap: 6px;
-      }
+      .topo nav{ display: none; }
     }
 
     /* ==========================================================
