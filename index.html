@@ -1200,6 +1200,22 @@
       box-shadow: 0 0 0 2px var(--cacau);
     }
 
+    /* OS BOTÕES DE TAMANHO. São os mesmos "chips" das categorias
+       — de propósito: a cliente já aprendeu naquela fita lá em
+       cima que bolinha escura é a escolhida. Ensinar dois
+       vocabulários visuais pro mesmo gesto é trabalho dobrado
+       pra ela e pra quem mantém o CSS. */
+    .fita-tamanhos{ display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
+    .chip-tamanho[aria-checked="true"]{
+      background: var(--marrom-marca); color: var(--branco);
+      border-color: var(--marrom-marca); font-weight: 600;
+    }
+    /* O aviso miúdo no card da vitrine */
+    .aviso-tamanhos{
+      font-size: 12.5px; font-weight: 600; color: var(--cacau);
+      opacity: .78; margin-top: 6px;
+    }
+
     .janela .categoria-produto{
       font-size: 12px; font-weight: 600; letter-spacing: .1em;
       text-transform: uppercase; color: var(--cacau); opacity: .78;
@@ -1456,6 +1472,39 @@
              │   data-preco      → só o número: 79.90          │
              │   data-destaque   → 1 vira "queridinho"         │
              │   data-novo       → 1 entra em "Novidades"      │
+             │   data-tamanhos   → SÓ se o produto vier em     │
+             │                     mais de um tamanho. Veja    │
+             │                     logo abaixo.                │
+             └────────────────────────────────────────────────┘
+
+             ┌────────────────────────────────────────────────┐
+             │  PRODUTO QUE VEM EM MAIS DE UM TAMANHO         │
+             │                                                 │
+             │  Escreva os tamanhos separados por barra:       │
+             │                                                 │
+             │      data-tamanhos="50 ml | 110 ml"             │
+             │                                                 │
+             │  Aí a página do produto ganha uns botõezinhos e │
+             │  a cliente escolhe. O tamanho escolhido vai     │
+             │  JUNTO na mensagem do WhatsApp, então o pedido  │
+             │  já chega dizendo qual pote separar.            │
+             │                                                 │
+             │  Se cada tamanho tem um preço, escreva com um   │
+             │  igual depois do nome:                          │
+             │                                                 │
+             │      data-tamanhos="50 ml=169.90 | 110 ml=249"  │
+             │                                                 │
+             │  (só o número, com ponto — igual ao data-preco) │
+             │                                                 │
+             │  AS FOTOS DE CADA TAMANHO                       │
+             │  Se cada tamanho tem foto própria, o nome do    │
+             │  arquivo leva o tamanho grudado, sem espaço:    │
+             │                                                 │
+             │      fotos/creme-jelly-50ml.jpg                 │
+             │      fotos/creme-jelly-50ml-2.jpg               │
+             │      fotos/creme-jelly-110ml.jpg                │
+             │                                                 │
+             │  Não tendo foto separada, ele usa as normais.   │
              └────────────────────────────────────────────────┘ -->
         <!-- Os filtros de reserva: só aparecem quando o JavaScript
              não roda. Veja "PARTE 5b" lá no CSS. -->
@@ -1683,33 +1732,26 @@
           <!-- ┌──────────────────────────────────────────────┐
                │  5. COLLAGEN JELLY CREAM                     │
                │                                              │
-               │  ⚠️ ESTE PRODUTO TEM DOIS TAMANHOS.          │
+               │  ESTE PRODUTO TEM DOIS TAMANHOS, e agora    │
+               │  quem escolhe é a cliente.                   │
+               │                                              │
                │  A Medicube vende o Collagen Jelly em 50 ml  │
-               │  E em 110 ml, e as lojas misturam fotos dos  │
-               │  dois no mesmo anúncio.                      │
+               │  e em 110 ml. Eu não tinha como saber qual   │
+               │  era o seu, então em vez de chutar um, os    │
+               │  dois ficam no site e ela aperta o que quer. │
+               │  O tamanho escolhido vai junto na mensagem   │
+               │  do WhatsApp, então você recebe o pedido já  │
+               │  sabendo qual pote separar.                  │
                │                                              │
-               │  O "55 g" que aparece no título da loja é     │
-               │  erro de cadastro: 55 g é o peso do Vita C   │
-               │  Capsule, o outro creme que vem no kit. Isso │
-               │  dá pra afirmar — o rótulo do Vita C mostra. │
-               │                                              │
-               │  Já ENTRE 50 ml e 110 ml não dá pra decidir  │
-               │  de fora: o título do kit diz 50, e a foto   │
-               │  do mesmo kit mostra 110. Por isso o campo    │
-               │  Conteúdo está VAZIO e a descrição não cita  │
-               │  tamanho. Melhor faltar um dado do que a     │
-               │  cliente receber um pote diferente do que    │
-               │  viu no site.                                │
-               │                                              │
-               │  As fotos aqui são as do pote de 50 ml.      │
-               │  Olhe o SEU pote: se for o de 110 ml, avise  │
-               │  que as fotos do tamanho certo já estão      │
-               │  separadas e é só trocar.                    │
+               │  (O "55 g" que aparece no título de algumas  │
+               │  lojas é erro de cadastro: 55 g é o peso do  │
+               │  Vita C Capsule, o outro creme do kit.)      │
                └──────────────────────────────────────────────┘ -->
           <article class="card" id="medicube-collagen-jelly-cream"
                    data-categoria="pele"
                    data-finalidades="hidratacao firmeza luminosidade"
                    data-marca="Medicube"
+                   data-tamanhos="50 ml | 110 ml"
                    data-preco=""
                    data-destaque="0"
                    data-novo="0">
@@ -1736,7 +1778,9 @@
               </div>
               <div class="detalhe-bloco">
                 <h4>Conteúdo</h4>
-                <!-- TROQUE AQUI: veja o aviso do tamanho lá em cima -->
+                <!-- Fica vazio de propósito: quando o produto tem
+                     data-tamanhos, é o botão escolhido que escreve
+                     aqui. Veja "OS TAMANHOS" no JavaScript. -->
                 <p></p>
               </div>
               <div class="detalhe-bloco">
@@ -2038,11 +2082,32 @@ const produtos = [...grade.querySelectorAll('.card')].map((el) => {
   // de site quebrado. Aqui ele mostra um recado honesto e o
   // botão do WhatsApp continua funcionando: aliás, produto sem
   // preço na tela é o que MAIS gera conversa.
+  const tamanhos = lerTamanhos(el.dataset.tamanhos);
+
+  // O preço do card: se cada tamanho tem o seu, o card mostra "a
+  // partir de" com o mais barato. Dizer só um número quando
+  // existem dois seria escolher um pela cliente.
   const valor = parseFloat(el.dataset.preco);
+  const precosDosTamanhos = tamanhos.map(t => t.preco).filter(Boolean);
+  const maisBarato = precosDosTamanhos.length ? Math.min(...precosDosTamanhos) : null;
   const temPreco = Number.isFinite(valor) && valor > 0;
   const campoPreco = el.querySelector('.preco');
-  campoPreco.textContent = temPreco ? emReais.format(valor) : "Preço sob consulta";
-  campoPreco.classList.toggle('preco-consultar', !temPreco);
+  if (maisBarato !== null) {
+    campoPreco.textContent = "a partir de " + emReais.format(maisBarato);
+    campoPreco.classList.remove('preco-consultar');
+  } else {
+    campoPreco.textContent = temPreco ? emReais.format(valor) : "Preço sob consulta";
+    campoPreco.classList.toggle('preco-consultar', !temPreco);
+  }
+
+  // Um aviso miúdo no card, pra quem está passando os olhos pela
+  // vitrine já saber que ali tem escolha a fazer.
+  if (tamanhos.length > 1) {
+    const aviso = document.createElement('p');
+    aviso.className = 'aviso-tamanhos';
+    aviso.textContent = `${tamanhos.length} tamanhos`;
+    el.querySelector('.preco').before(aviso);
+  }
   // Repare que a frase NÃO usa "o" nem "a" antes do nome. É de
   // propósito: "Vi o Máscara capilar" estaria errado, e "Vi a
   // Sérum" também. Como o programa monta a frase sozinho pra
@@ -2054,9 +2119,7 @@ const produtos = [...grade.querySelectorAll('.card')].map((el) => {
   // cliente está falando — sem ficar perguntando "qual mesmo?".
   // O \n é uma quebra de linha: o link fica sozinho embaixo, que
   // é como o WhatsApp gosta pra deixar ele clicável.
-  el.querySelector('.botao').href = linkZap(
-    `Oi! Vi no site e queria saber mais sobre: ${nome} 🌷\n${urlDoProduto(el.id)}`
-  );
+  el.querySelector('.botao').href = mensagemDoProduto(el.id, nome, null);
 
   // Tenta achar a foto de verdade deste produto (veja a função
   // logo abaixo). Se achar, ela entra no lugar do recadinho.
@@ -2118,11 +2181,14 @@ const produtos = [...grade.querySelectorAll('.card')].map((el) => {
     preco: temPreco ? valor : null,   // null = ainda sem preço definido
     destaque: el.dataset.destaque === "1",
     novo: el.dataset.novo === "1",
-    // O "texto" é tudo que a busca vasculha, já sem acento
+    tamanhos,
+    // O "texto" é tudo que a busca vasculha, já sem acento. Os
+    // tamanhos entram aqui também: quem digita "110" acha o pote
+    // grande sem precisar saber o nome do produto.
     texto: semAcento([
       nome, marca, rotular(el.dataset.categoria), el.dataset.categoria,
       finalidades.map(rotular).join(" "), finalidades.join(" "),
-      descricao, recomendacao
+      descricao, recomendacao, tamanhos.map(t => t.rotulo).join(" ")
     ].join(" "))
   };
 });
@@ -2401,6 +2467,57 @@ const janelaConteudo = document.getElementById('janela-conteudo');
 let quemAbriuAJanela = null;
 let fechandoPeloHistorico = false;
 
+/* A mensagem que abre no WhatsApp quando a cliente clica em
+   "Quero esse". Ela mora numa função só porque agora nasce em
+   dois lugares — no card e na página do produto — e o tamanho
+   escolhido precisa entrar nela.
+
+   Repare que a frase NÃO usa "o" nem "a" antes do nome. É de
+   propósito: "Vi o Máscara" estaria errado, e "Vi a Sérum"
+   também. Como o programa monta a frase sozinho pra qualquer
+   produto novo, ela precisa funcionar nos dois gêneros — então a
+   gente escreve de um jeito que não precisa escolher. ;)
+
+   E ela leva o LINK do produto junto: quando a conversa abre, dá
+   pra clicar e ver na hora de qual produto a cliente fala, sem
+   ficar perguntando "qual mesmo?". O \n é a quebra de linha que
+   deixa o link sozinho embaixo, que é como o WhatsApp gosta. */
+function mensagemDoProduto(id, nome, tamanho) {
+  const comTamanho = tamanho ? `${nome} — ${tamanho.rotulo}` : nome;
+  return linkZap(`Oi! Vi no site e queria saber mais sobre: ${comTamanho} 🌷\n${urlDoProduto(id)}`);
+}
+
+/* ---------- OS TAMANHOS ----------
+   Alguns produtos vêm em mais de um pote. Em vez de a gente
+   adivinhar qual é (e mostrar o errado pra cliente), os dois
+   ficam na página e ela escolhe.
+
+   O formato do data-tamanhos é de propósito simples de escrever
+   à mão, porque quem escreve é ela, não um programa:
+
+       data-tamanhos="50 ml | 110 ml"
+       data-tamanhos="50 ml=169.90 | 110 ml=249"
+
+   Repare que preço e tamanho andam JUNTOS, no mesmo pedaço de
+   texto. A tentação era fazer duas listas paralelas — uma de
+   tamanhos e outra de preços, casadas pela posição. Parece mais
+   organizado e é uma armadilha: basta alguém apagar um item de
+   uma lista e o site passa a vender o pote grande pelo preço do
+   pequeno, sem nenhum erro na tela pra denunciar.            */
+function lerTamanhos(texto) {
+  return (texto || "").split('|').map(p => p.trim()).filter(Boolean).map(pedaco => {
+    const [rotulo, preco] = pedaco.split('=');
+    const valor = parseFloat(preco);
+    return {
+      rotulo: rotulo.trim(),
+      preco: Number.isFinite(valor) && valor > 0 ? valor : null,
+      // "50 ml" vira "50ml" — é o que entra no nome do arquivo de
+      // foto e o que a gente compara internamente
+      apelido: rotulo.trim().toLowerCase().replace(/\s+/g, '')
+    };
+  });
+}
+
 /* ---------- AS OUTRAS FOTOS DO PRODUTO ----------
    A regra de nome é a mesma da foto principal, com um número
    colado no fim:
@@ -2427,8 +2544,15 @@ function existeImagem(caminho) {
   });
 }
 
-async function fotosDoProduto(p) {
-  if (p.galeria) return p.galeria;      // já procurou uma vez, não procura de novo
+async function fotosDoProduto(p, tamanho) {
+  // Produto com tamanhos procura primeiro as fotos DAQUELE pote
+  // (fotos/id-110ml.jpg). Não achando, cai nas fotos normais —
+  // assim dá pra ter foto separada só de um tamanho, ou de
+  // nenhum, sem o site quebrar.
+  const base = tamanho ? `${p.id}-${tamanho.apelido}` : p.id;
+  p.galerias = p.galerias || {};
+  if (p.galerias[base]) return p.galerias[base];
+
   const lista = [];
 
   /* A CONTAGEM COMEÇA NA PRINCIPAL, e essa escolha tem história.
@@ -2449,13 +2573,18 @@ async function fotosDoProduto(p) {
     const sufixo = n === 1 ? '' : `-${n}`;
     let achada = null;
     for (const ext of EXTENSOES) {
-      const caminho = `fotos/${p.id}${sufixo}.${ext}`;
+      const caminho = `fotos/${base}${sufixo}.${ext}`;
       if (await existeImagem(caminho)) { achada = caminho; break; }
     }
     if (!achada) break;    // buraco na sequência: a galeria para aqui
     lista.push(achada);
   }
-  p.galeria = lista;
+
+  // Tamanho sem foto própria usa as fotos normais do produto, em
+  // vez de ficar sem foto nenhuma.
+  if (!lista.length && tamanho) return fotosDoProduto(p, null);
+
+  p.galerias[base] = lista;
   return lista;
 }
 
@@ -2485,33 +2614,85 @@ function montarGaleria(p) {
 
   // As miniaturas chegam depois, quando a procura terminar. A
   // janela não espera por elas: a foto principal já está na tela.
-  fotosDoProduto(p).then((fotos) => {
-    if (!fotos.length) return;
-    // Se a janela abriu antes de a foto principal ter sido
-    // encontrada (é o caso de quem chega pelo link do produto),
-    // ela entra agora, no lugar do recadinho "foto do produto".
-    if (!grande.src) {
+  // A função devolve um "trocar", que a escolha de tamanho chama
+  // pra recarregar a galeria com as fotos do outro pote.
+  function carregar(tamanho) {
+    fotosDoProduto(p, tamanho).then((fotos) => {
+      if (!fotos.length) return;
+      // A primeira foto entra sempre. Isso cobre dois casos: a
+      // janela ter aberto antes de a foto do card ser encontrada
+      // (quem chega pelo link do produto), e a troca de tamanho.
       grande.src = fotos[0];
       palco.classList.add('com-foto');
-      palco.replaceChildren(grande);
-    }
-    if (fotos.length < 2) return;       // uma foto só não é galeria
-    tiras.replaceChildren(...fotos.map((caminho, i) => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'mini' + (i === 0 ? ' escolhida' : '');
-      b.setAttribute('aria-label', `Ver foto ${i + 1} de ${fotos.length}`);
-      b.innerHTML = `<img src="${caminho}" alt="" loading="lazy">`;
-      b.addEventListener('click', () => {
-        grande.src = caminho;
-        tiras.querySelectorAll('.mini').forEach(m => m.classList.remove('escolhida'));
-        b.classList.add('escolhida');
-      });
-      return b;
-    }));
-  });
+      if (!palco.contains(grande)) palco.replaceChildren(grande);
 
-  return galeria;
+      tiras.replaceChildren();
+      if (fotos.length < 2) return;       // uma foto só não é galeria
+      tiras.replaceChildren(...fotos.map((caminho, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'mini' + (i === 0 ? ' escolhida' : '');
+        b.setAttribute('aria-label', `Ver foto ${i + 1} de ${fotos.length}`);
+        b.innerHTML = `<img src="${caminho}" alt="" loading="lazy">`;
+        b.addEventListener('click', () => {
+          grande.src = caminho;
+          tiras.querySelectorAll('.mini').forEach(m => m.classList.remove('escolhida'));
+          b.classList.add('escolhida');
+        });
+        return b;
+      }));
+    });
+  }
+
+  carregar(p.tamanhos[0] || null);
+  return { elemento: galeria, trocar: carregar };
+}
+
+/* OS BOTÕES DE TAMANHO NA PÁGINA DO PRODUTO.
+
+   Escolher um tamanho muda QUATRO coisas de uma vez, e é por isso
+   que tudo isso mora numa função só: se cada pedaço se
+   atualizasse por conta própria, um dia um deles ia ficar pra
+   trás — e o pior deles seria o link do WhatsApp, porque aí a
+   cliente pede um pote na tela e outro chega na sua conversa.
+
+     1. a galeria (cada pote tem foto própria, se existir)
+     2. a linha "Conteúdo"
+     3. o preço, quando cada tamanho tem o seu
+     4. a mensagem do WhatsApp                                  */
+function montarTamanhos(p, aoEscolher) {
+  if (p.tamanhos.length < 2) return null;
+
+  const bloco = document.createElement('div');
+  bloco.className = 'detalhe-bloco';
+  const titulo = document.createElement('h4');
+  titulo.id = 'titulo-tamanhos';
+  titulo.textContent = 'Tamanho';
+
+  const fita = document.createElement('div');
+  fita.className = 'fita-tamanhos';
+  // O role="radiogroup" conta pro leitor de tela que os botões
+  // são UMA escolha entre opções, e não vários botões soltos.
+  fita.setAttribute('role', 'radiogroup');
+  fita.setAttribute('aria-labelledby', 'titulo-tamanhos');
+
+  const botoes = p.tamanhos.map((t, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip chip-tamanho';
+    b.setAttribute('role', 'radio');
+    b.setAttribute('aria-checked', i === 0 ? 'true' : 'false');
+    b.textContent = t.rotulo + (t.preco ? ` · ${emReais.format(t.preco)}` : '');
+    b.addEventListener('click', () => {
+      botoes.forEach(o => o.setAttribute('aria-checked', 'false'));
+      b.setAttribute('aria-checked', 'true');
+      aoEscolher(t);
+    });
+    return b;
+  });
+  fita.append(...botoes);
+  bloco.append(titulo, fita);
+  return bloco;
 }
 
 function montarJanela(p) {
@@ -2535,10 +2716,33 @@ function montarJanela(p) {
   link.addEventListener('click', () => copiarLink(p.id, p.nome));
   acoes.append(zap, link);
 
+  const galeria = montarGaleria(p);
+  const preco = copia('.preco');
+  const detalhe = copia('.detalhe');
+
+  // É AQUI QUE A ESCOLHA DE TAMANHO VIRA CONSEQUÊNCIA.
+  function escolherTamanho(t) {
+    galeria.trocar(t);
+    if (t.preco) {
+      preco.textContent = emReais.format(t.preco);
+      preco.classList.remove('preco-consultar');
+    }
+    // A linha "Conteúdo" passa a dizer o tamanho escolhido
+    const blocoConteudo = [...detalhe.querySelectorAll('.detalhe-bloco')]
+      .find(b => b.querySelector('h4')?.textContent === 'Conteúdo');
+    if (blocoConteudo) blocoConteudo.querySelector('p').textContent = t.rotulo;
+    // E o mais importante: a mensagem do WhatsApp
+    zap.href = mensagemDoProduto(p.id, p.nome, t);
+  }
+
+  const seletor = montarTamanhos(p, escolherTamanho);
+  if (seletor && detalhe) detalhe.prepend(seletor);
+  if (p.tamanhos.length) escolherTamanho(p.tamanhos[0]);
+
   janelaConteudo.replaceChildren(
-    ...[montarGaleria(p), copia('.categoria-produto'), titulo,
-        copia('.marca-produto'), copia('.descricao'), copia('.preco'),
-        copia('.recomendacao'), copia('.detalhe'), acoes].filter(Boolean)
+    ...[galeria.elemento, copia('.categoria-produto'), titulo,
+        copia('.marca-produto'), copia('.descricao'), preco,
+        copia('.recomendacao'), detalhe, acoes].filter(Boolean)
   );
   janelaConteudo.scrollTop = 0;
 }
