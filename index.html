@@ -885,8 +885,21 @@
     /* ==========================================================
        PARTE 10 — RODAPÉ
        ========================================================== */
+    /* O RODAPÉ É MARROM, O MARROM DO LOGOTIPO.
+       Ele era amora (o vinho escuro dos títulos). A troca deixa a
+       última tela do site com a cor da marca — e tem um efeito
+       colateral bom: o site inteiro passa a terminar na mesma cor
+       com que ele convida a agir.
+
+       Só que marrom é mais CLARO que amora, e todo texto branco
+       aqui dentro perdeu um pouco de contraste na troca (o texto
+       cheio caiu de 10.41 pra 7.54). Continua passando com folga,
+       mas os textos apagadinhos — os títulos das listas e os
+       créditos — estavam apagados demais pro fundo novo. Por isso
+       as opacidades logo abaixo subiram: não é capricho, é a
+       conta refeita pro fundo que mudou. */
     .rodape{
-      background: var(--amora); color: var(--porcelana);
+      background: var(--marrom-marca); color: var(--porcelana);
       padding: 70px 0 34px;
     }
     .rodape h2{ color: var(--porcelana); font-size: clamp(24px, 4vw, 30px); margin-bottom: 12px; }
@@ -894,11 +907,11 @@
     .rodape .colunas{
       display: flex; flex-wrap: wrap; gap: 40px 64px;
       padding-top: 34px; margin-top: 34px;
-      border-top: 1px solid rgba(253, 248, 246, .22);
+      border-top: 1px solid rgba(253, 248, 246, .28);
     }
     .rodape h3{ color: var(--porcelana); font-size: 15px; font-family: 'Figtree', sans-serif;
                 font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
-                margin-bottom: 12px; opacity: .8; }
+                margin-bottom: 12px; opacity: .88; }   /* era .8 no fundo amora → 6.29 */
     .rodape ul{ list-style: none; }
     .rodape li{ margin-bottom: 1px; }
     /* inline-block + padding pra cada link do rodapé virar um
@@ -906,17 +919,21 @@
     .rodape a{ color: var(--porcelana); text-decoration: none; font-size: 15px; }
     .rodape li a{ display: inline-block; padding: 6px 0; }
     .rodape a:hover{ text-decoration: underline; text-underline-offset: 4px; }
-    /* EXCEÇÃO IMPORTANTE: aqui o fundo é amora (escuro). Um botão
-       marrom em cima dele quase sumiria — marrom e amora têm
-       claridade parecidíssima (1.38 de contraste entre os dois).
-       Então neste único lugar o botão continua claro, com a LETRA
-       marrom: 7.54 de contraste e o botão se destaca do fundo. */
+    /* EXCEÇÃO IMPORTANTE, e agora ela é óbvia: o fundo daqui É o
+       marrom. Um botão marrom em cima dele não "quase sumiria" —
+       ele sumiria mesmo, seria a mesma cor exata.
+       Então neste único lugar do site o botão se inverte: fundo
+       claro com a LETRA marrom. Dá 7.54 dos dois jeitos (o botão
+       contra o rodapé, e a letra contra o botão), e ele salta da
+       parede em vez de derreter nela.
+       Antes, com o rodapé amora, a regra já era esta — mudava só
+       o motivo: amora e marrom têm claridade parecidíssima. */
     .rodape .botao-cheio{ background: var(--porcelana); color: var(--marrom-marca); box-shadow: none; }
     .rodape .botao-cheio:hover{ background: var(--branco); color: var(--marrom-hover); }
     .creditos{
       margin-top: 34px; padding-top: 20px;
-      border-top: 1px solid rgba(253, 248, 246, .22);
-      font-size: 13.5px; opacity: .72;
+      border-top: 1px solid rgba(253, 248, 246, .28);
+      font-size: 13.5px; opacity: .85;   /* era .72 no fundo amora → 5.98 */
     }
     /* Se o Instagram não estiver configurado, o item some sozinho */
     .rodape li:empty{ display: none; }
