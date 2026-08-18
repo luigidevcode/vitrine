@@ -1090,6 +1090,192 @@
     }
 
     /* ==========================================================
+       PARTE 10b — A PÁGINA DO PRODUTO (a janela)
+       ========================================================== */
+
+    /* O DETALHE DENTRO DO CARD.
+       Com JavaScript ele fica escondido no card e só aparece na
+       janela. SEM JavaScript a janela nunca abre — então ele
+       aparece aqui mesmo, dentro do card, e a cliente lê tudo do
+       mesmo jeito. É o "Plano A / Plano B" da casa: o conteúdo
+       nunca depende do JavaScript pra existir, só pra ficar mais
+       bonito. Repare que a regra é NEGATIVA (esconde quando TEM
+       JS), que é o que garante isso. */
+    html.com-js .card .detalhe{ display: none; }
+    .detalhe{ text-align: left; margin-top: 14px; }
+    .detalhe-bloco{ margin-bottom: 16px; }
+    /* Bloco cujo parágrafo está vazio some inteiro — inclusive o
+       título. Sem isto, um "Como usar" apareceria sozinho, sem
+       texto embaixo, com cara de coisa quebrada. O :has() é quem
+       permite dizer "o pai de um filho vazio". */
+    .detalhe-bloco:has(> p:empty){ display: none; }
+    .detalhe-bloco h4{
+      font-family: 'Figtree', sans-serif;
+      font-size: 12px; font-weight: 600; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--cacau); opacity: .78;
+      margin-bottom: 4px;
+    }
+    .detalhe-bloco p{ font-size: 15px; line-height: 1.6; }
+
+    .janela{
+      width: min(560px, 100%);
+      max-height: min(86vh, 780px);
+      padding: 0; border: 0; border-radius: 22px;
+      background: var(--porcelana); color: var(--tinta);
+      box-shadow: 0 30px 70px rgba(70, 54, 61, .3);
+      overflow: hidden;
+    }
+    /* O ::backdrop é o fundo escuro atrás da janela. Ele não é um
+       elemento que existe no HTML: o navegador desenha sozinho
+       quando a janela abre com showModal(). */
+    .janela::backdrop{ background: rgba(70, 54, 61, .55); }
+    .janela-conteudo{
+      overflow-y: auto;
+      max-height: inherit;
+      padding: 0 26px 26px;
+      /* espaço pro polegar no celular, e pro botão de fechar */
+      overscroll-behavior: contain;
+    }
+    .janela-fechar{
+      position: absolute; top: 12px; right: 12px; z-index: 3;
+      width: 40px; height: 40px; border: 0; border-radius: 999px;
+      background: rgba(253, 248, 246, .9); color: var(--cacau);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 10px rgba(70, 54, 61, .18);
+    }
+    .janela-fechar svg{ width: 19px; height: 19px; fill: currentColor; }
+    .janela-fechar:hover{ background: var(--branco); }
+
+    /* A foto grande, no topo da janela. Ela ocupa a largura toda
+       e sangra pra fora do padding do conteúdo — daí as margens
+       negativas. O arco vira só uma curvinha embaixo: aqui a foto
+       já é grande o bastante pra não precisar da moldura em arco
+       chamando atenção. */
+    .janela .moldura{
+      aspect-ratio: 1 / 1;
+      /* O teto de altura é pra tela baixa (notebook, celular
+         deitado): sem ele, a foto quadrada empurrava o nome do
+         produto e o preço pra fora da janela, e a pessoa abria o
+         produto e via só uma foto gigante sem saber quanto custa.
+         Com o teto, a foto encolhe e o resto continua à vista. */
+      max-height: 44vh;
+      margin: 0 -26px 14px;
+      border-radius: 0 0 20px 20px;
+    }
+    /* NO CARD A FOTO É CORTADA, NA JANELA ELA APARECE INTEIRA.
+       Não é incoerência, são dois trabalhos diferentes. No card a
+       foto é uma miniatura numa grade: ali o que importa é o
+       bloco ficar cheio e alinhado com os vizinhos, e cortar 12%
+       da borda não custa nada. Na janela a cliente clicou
+       justamente pra ver o produto de perto — cortar ali seria
+       esconder o que ela pediu pra ver.
+       Por isso aqui é "contain" e o arco vira quadrado: a foto do
+       produto também é quadrada, então ela encaixa sem sobrar
+       faixa de fundo em canto nenhum. */
+    .janela .moldura.com-foto{ background: var(--branco); }
+    .janela .moldura.com-foto img{ object-fit: contain; padding: 5%; }
+    /* AS MINIATURAS DA GALERIA.
+       Uma fitinha que rola pro lado, igual à das categorias — é o
+       mesmo problema (mais coisa do que cabe na largura) e vale a
+       mesma solução, pra cliente não ter que aprender dois gestos
+       diferentes dentro do mesmo site. */
+    .galeria-miniaturas{
+      display: flex; gap: 8px;
+      overflow-x: auto; scrollbar-width: thin;
+      margin-bottom: 16px; padding-bottom: 4px;
+    }
+    .galeria-miniaturas:empty{ display: none; }
+    .mini{
+      flex: 0 0 auto; width: 62px; height: 62px;
+      padding: 0; cursor: pointer; overflow: hidden;
+      border: 1px solid var(--blush); border-radius: 12px;
+      background: var(--branco);
+    }
+    .mini img{ width: 100%; height: 100%; object-fit: cover; }
+    /* A escolhida ganha um aro escuro, não só uma cor clarinha:
+       quem enxerga pouco precisa ver QUAL está aberta. */
+    .mini.escolhida{
+      border-color: var(--cacau);
+      box-shadow: 0 0 0 2px var(--cacau);
+    }
+
+    .janela .categoria-produto{
+      font-size: 12px; font-weight: 600; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--cacau); opacity: .78;
+      margin-bottom: 6px;
+    }
+    .janela h2{ font-size: 26px; line-height: 1.2; margin-bottom: 4px; }
+    .janela .marca-produto{ font-size: 15px; opacity: .8; margin-bottom: 10px; }
+    .janela .marca-produto:empty{ display: none; }
+    .janela .descricao{ font-size: 16px; margin-bottom: 14px; }
+    .janela .preco{
+      font-size: 24px; font-weight: 600; color: var(--cacau);
+      margin: 0 0 16px;
+    }
+    .janela .preco-consultar{ font-size: 17px; font-weight: 500; opacity: .8; }
+    .janela .recomendacao{
+      font-style: italic; font-size: 15.5px; line-height: 1.6;
+      color: var(--cacau); background: var(--blush);
+      border-radius: 14px; padding: 14px 16px; margin: 0 0 18px;
+    }
+    .janela .recomendacao:empty{ display: none; }
+    .janela .recomendacao::before{ content: "“"; }
+    .janela .recomendacao::after{ content: "”"; }
+    .janela .detalhe{ margin-top: 0; }
+    /* Os botões ficam colados no pé da janela, sempre à vista,
+       mesmo com o texto rolando por baixo. É o que a pessoa vai
+       querer apertar depois de ler. */
+    .janela-acoes{
+      position: sticky; bottom: 0;
+      display: flex; gap: 10px; align-items: center;
+      /* O degradê é mais alto que o botão de propósito: o texto
+         precisa DESAPARECER antes de chegar nele. Com uma faixa
+         curta, a linha que passava por trás ficava meio visível e
+         meio escondida — dava aquela impressão de página mal
+         montada, que é pior que o próprio texto cortado. */
+      padding: 34px 0 0;
+      background: linear-gradient(to bottom, transparent, var(--porcelana) 62%);
+    }
+    .janela-acoes .botao{ flex: 1; text-align: center; }
+    .janela .compartilhar{ position: static; margin: 0; }
+
+    /* CELULAR: a janela vira uma folha que sobe de baixo e ocupa
+       a largura inteira — é o formato que o dedo espera. */
+    @media (max-width: 640px){
+      .janela{
+        width: 100%; max-width: 100%;
+        max-height: 92vh;
+        margin: auto 0 0;             /* encostada embaixo */
+        border-radius: 22px 22px 0 0;
+      }
+      .janela-conteudo{ padding: 0 18px 18px; }
+      .janela .moldura{ margin: 0 -18px 12px; aspect-ratio: 1 / 1; }
+      .janela h2{ font-size: 22px; }
+      .janela .descricao{ font-size: 15px; }
+      .detalhe-bloco p{ font-size: 14.5px; }
+    }
+
+    /* O que sinaliza que dá pra clicar no produto. A foto e o
+       nome viram alvo de clique — que é onde a mão vai sozinha —
+       e o "Ver detalhes" existe pra quem não adivinha isso. */
+    .abrir-detalhe{
+      background: none; border: 0; padding: 0; cursor: pointer;
+      font: inherit; color: inherit; text-align: inherit; width: 100%;
+    }
+    .card h3 .abrir-detalhe:hover{ text-decoration: underline;
+      text-decoration-color: var(--rosa); text-underline-offset: 3px; }
+    .card .moldura.clicavel{ cursor: pointer; }
+    .ver-detalhes{
+      background: none; border: 0; cursor: pointer; font-family: inherit;
+      font-size: 13.5px; font-weight: 600; color: var(--marrom-marca);
+      padding: 6px 0; margin-top: 2px;
+      text-decoration: underline; text-decoration-color: var(--marrom-claro);
+      text-underline-offset: 4px;
+    }
+    .ver-detalhes:hover{ color: var(--marrom-hover); }
+
+    /* ==========================================================
        PARTE 11 — BOTÃO FLUTUANTE DO WHATSAPP
        ========================================================== */
     .zap{
@@ -1302,11 +1488,6 @@
         <span class="alvo" id="cat-perfumes"></span>
 
         <div class="grade" id="grade">
-          <!-- ┌──────────────────────────────────────────────┐
-               │  1. ZERO PORE PAD                            │
-               │  Dados conferidos no rótulo do produto:      │
-               │  155 g / 70 pads, AHA · BHA · Pantenol       │
-               └──────────────────────────────────────────────┘ -->
           <article class="card" id="medicube-zero-pore-pad"
                    data-categoria="pele"
                    data-finalidades="esfoliacao poros oleosidade"
@@ -1320,20 +1501,45 @@
             <p class="categoria-produto">Pele</p>
             <h3>Zero Pore Pad</h3>
             <p class="marca-produto"></p>
-            <!-- TROQUE AQUI: dá pra deixar mais na sua voz. O que
-                 está aqui são só os fatos do rótulo. -->
             <p class="descricao">Tônico em discos com AHA, BHA e pantenol. 70 unidades (155 g).</p>
             <!-- TROQUE AQUI: a sua recomendação, em primeira pessoa.
-                 Enquanto estiver vazia, o bloco some sozinho. -->
+                 Ela aparece no card E na página do produto.
+                 Enquanto estiver vazia, some sozinha dos dois. -->
             <p class="recomendacao"></p>
             <p class="preco"></p>
             <a class="botao botao-cheio" href="#falar">Quero esse</a>
+
+            <!-- ┌── A PÁGINA DESTE PRODUTO ─────────────────────┐
+                 │ Isto NÃO aparece no card: é o conteúdo que    │
+                 │ abre quando a cliente clica no produto.       │
+                 │ Sem JavaScript ele aparece aqui mesmo, dentro │
+                 │ do card — nada se perde.                      │
+                 │ Bloco vazio some sozinho, então dá pra deixar │
+                 │ em branco o que você ainda não sabe.     │
+                 └───────────────────────────────────────────────┘ -->
+            <div class="detalhe">
+              <div class="detalhe-bloco">
+                <h4>Sobre o produto</h4>
+                <p>Tônico facial em formato de discos, para limpeza e renovação da pele. Indicado para quem quer controlar a oleosidade e reduzir a aparência dos poros.</p>
+              </div>
+              <div class="detalhe-bloco">
+                <h4>Na fórmula</h4>
+                <p>AHA, BHA, pantenol, alantoína e hialuronato de sódio.</p>
+              </div>
+              <div class="detalhe-bloco">
+                <h4>Conteúdo</h4>
+                <p>70 unidades · 155 g</p>
+              </div>
+              <div class="detalhe-bloco">
+                <h4>Como usar</h4>
+                <!-- TROQUE AQUI: eu não achei o modo de uso numa
+                     fonte confiável, então deixei vazio de
+                     propósito, e vazio ele some. -->
+                <p></p>
+              </div>
+            </div>
           </article>
 
-          <!-- ┌──────────────────────────────────────────────┐
-               │  2. SÉRUM PDRN PINK PEPTIDE                  │
-               │  30 ml, confirmado no rótulo e na loja       │
-               └──────────────────────────────────────────────┘ -->
           <article class="card" id="medicube-pdrn-pink-peptide-serum"
                    data-categoria="pele"
                    data-finalidades="luminosidade firmeza uniformizacao"
@@ -1347,20 +1553,45 @@
             <p class="categoria-produto">Pele</p>
             <h3>Sérum PDRN Pink Peptide</h3>
             <p class="marca-produto"></p>
-            <!-- TROQUE AQUI -->
             <p class="descricao">Sérum com PDRN e complexo de 5 peptídeos. 30 ml.</p>
-            <!-- TROQUE AQUI: a sua recomendação -->
+            <!-- TROQUE AQUI: a sua recomendação, em primeira pessoa.
+                 Ela aparece no card E na página do produto.
+                 Enquanto estiver vazia, some sozinha dos dois. -->
             <p class="recomendacao"></p>
             <p class="preco"></p>
             <a class="botao botao-cheio" href="#falar">Quero esse</a>
+
+            <!-- ┌── A PÁGINA DESTE PRODUTO ─────────────────────┐
+                 │ Isto NÃO aparece no card: é o conteúdo que    │
+                 │ abre quando a cliente clica no produto.       │
+                 │ Sem JavaScript ele aparece aqui mesmo, dentro │
+                 │ do card — nada se perde.                      │
+                 │ Bloco vazio some sozinho, então dá pra deixar │
+                 │ em branco o que você ainda não sabe.     │
+                 └───────────────────────────────────────────────┘ -->
+            <div class="detalhe">
+              <div class="detalhe-bloco">
+                <h4>Sobre o produto</h4>
+                <p>Sérum facial para uniformizar o tom da pele, aumentar a elasticidade e dar luminosidade. Indicado para peles opacas, com tom irregular e sinais iniciais de envelhecimento.</p>
+              </div>
+              <div class="detalhe-bloco">
+                <h4>Na fórmula</h4>
+                <p>PDRN (sodium DNA) 1%, ácido hialurônico e complexo de 5 peptídeos.</p>
+              </div>
+              <div class="detalhe-bloco">
+                <h4>Conteúdo</h4>
+                <p>30 ml</p>
+              </div>
+              <div class="detalhe-bloco">
+                <h4>Como usar</h4>
+                <!-- TROQUE AQUI: eu não achei o modo de uso numa
+                     fonte confiável, então deixei vazio de
+                     propósito, e vazio ele some. -->
+                <p></p>
+              </div>
+            </div>
           </article>
 
-          <!-- ┌──────────────────────────────────────────────┐
-               │  3. CREME PDRN COLÁGENO ROSA                 │
-               │  ATENÇÃO: o volume NÃO estava na página que  │
-               │  eu li, então não está escrito aqui. Quando  │
-               │  você souber, acrescente na descrição.       │
-               └──────────────────────────────────────────────┘ -->
           <article class="card" id="medicube-pdrn-creme-colageno-rosa"
                    data-categoria="pele"
                    data-finalidades="luminosidade hidratacao uniformizacao"
@@ -1374,12 +1605,44 @@
             <p class="categoria-produto">Pele</p>
             <h3>Creme PDRN Colágeno Rosa</h3>
             <p class="marca-produto"></p>
-            <!-- TROQUE AQUI -->
-            <p class="descricao">Creme facial em cápsulas de colágeno rosa, com PDRN.</p>
-            <!-- TROQUE AQUI: a sua recomendação -->
+            <p class="descricao">Creme em cápsulas de colágeno com PDRN e niacinamida. 55 g.</p>
+            <!-- TROQUE AQUI: a sua recomendação, em primeira pessoa.
+                 Ela aparece no card E na página do produto.
+                 Enquanto estiver vazia, some sozinha dos dois. -->
             <p class="recomendacao"></p>
             <p class="preco"></p>
             <a class="botao botao-cheio" href="#falar">Quero esse</a>
+
+            <!-- ┌── A PÁGINA DESTE PRODUTO ─────────────────────┐
+                 │ Isto NÃO aparece no card: é o conteúdo que    │
+                 │ abre quando a cliente clica no produto.       │
+                 │ Sem JavaScript ele aparece aqui mesmo, dentro │
+                 │ do card — nada se perde.                      │
+                 │ Bloco vazio some sozinho, então dá pra deixar │
+                 │ em branco o que você ainda não sabe.
+     │
+                 └───────────────────────────────────────────────┘ -->
+            <div class="detalhe">
+              <div class="detalhe-bloco">
+                <h4>Sobre o produto</h4>
+                <p>Creme facial em cápsulas de colágeno rosa, para uniformizar o tom, cuidar de manchas e melhorar a luminosidade. Indicado para peles opacas, desidratadas ou com tom irregular.</p>
+              </div>
+              <div class="detalhe-bloco">
+                <h4>Na fórmula</h4>
+                <p>PDRN (sodium DNA), niacinamida 5%, colágeno e ácido hialurônico.</p>
+              </div>
+              <div class="detalhe-bloco">
+                <h4>Conteúdo</h4>
+                <p>55 g</p>
+              </div>
+              <div class="detalhe-bloco">
+                <h4>Como usar</h4>
+                <!-- TROQUE AQUI: eu não achei o modo de uso numa
+                     fonte confiável, então deixei vazio de
+                     propósito, e vazio ele some. -->
+                <p></p>
+              </div>
+            </div>
           </article>
 
         </div><!-- fim da grade -->
@@ -1524,6 +1787,31 @@
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-2.9.8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.6-6.1c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.3-.7.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.4 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.8 2.8 4.5 3.9 1.7.7 2.3.8 3.1.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2 0-.1-.2-.2-.5-.3Z"/></svg>
     <span class="zap-texto">Conversar no WhatsApp</span>
   </a>
+
+  <!-- ========================================================
+       A PÁGINA DO PRODUTO
+
+       É UMA janela só, reaproveitada: o JavaScript enche ela com
+       os dados do produto que a cliente clicou. Não existe uma
+       janela por produto — se existisse, cada produto novo que
+       você criasse exigiria uma janela nova escrita na mão, e a
+       promessa deste arquivo é que produto novo é copiar um bloco
+       e pronto.
+
+       O <dialog> é uma etiqueta do próprio HTML, e escolhê-la
+       economiza um monte de código difícil de acertar: ele já
+       fecha no Esc, já prende o foco do teclado lá dentro
+       (ninguém sai tabulando pra trás do fundo escuro), já
+       escurece o resto da página e já avisa o leitor de tela que
+       o que está atrás ficou inativo. Fazer isso à mão em
+       JavaScript é onde quase todo site erra acessibilidade.
+       ======================================================== -->
+  <dialog class="janela" id="janela-produto" aria-labelledby="janela-titulo">
+    <button class="janela-fechar" type="button" aria-label="Fechar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5 5 6.4l5.6 5.6L5 17.6 6.4 19l5.6-5.6 5.6 5.6 1.4-1.4-5.6-5.6L19 6.4 17.6 5 12 10.6 6.4 5Z"/></svg>
+    </button>
+    <div class="janela-conteudo" id="janela-conteudo"></div>
+  </dialog>
 
   <div class="aviso-copia" id="aviso-copia" role="status" aria-live="polite"></div>
 
@@ -1681,6 +1969,44 @@ const produtos = [...grade.querySelectorAll('.card')].map((el) => {
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.9 12a3.1 3.1 0 0 1 3.1-3.1h4V7h-4a5 5 0 0 0 0 10h4v-1.9h-4A3.1 3.1 0 0 1 3.9 12ZM8 13h8v-2H8v2Zm9-6h-4v1.9h4a3.1 3.1 0 0 1 0 6.2h-4V17h4a5 5 0 0 0 0-10Z"/></svg>Copiar link';
   compartilhar.addEventListener('click', () => copiarLink(el.id, nome));
   el.appendChild(compartilhar);
+
+  /* O QUE ABRE A PÁGINA DO PRODUTO.
+     São três alvos, e cada um existe por um motivo:
+
+     • o NOME vira um <button> de verdade. Não é um <div> que
+       finge ser botão: assim ele entra na ordem do Tab, responde
+       ao Enter e é anunciado como botão pelo leitor de tela, tudo
+       de graça.
+     • a FOTO também abre, porque é pra lá que a mão vai sozinha.
+       Ela NÃO entra na ordem do Tab de propósito — seria uma
+       segunda parada de teclado levando exatamente pro mesmo
+       lugar que o nome, e isso só cansa quem navega por teclado.
+     • o "Ver detalhes" existe porque nada em um card avisa que
+       ele é clicável. Quem já usa loja online tenta; quem não usa,
+       não descobre nunca. O texto resolve isso sem depender de
+       adivinhação.                                              */
+  const abrir = () => {
+    quemAbriuAJanela = el.querySelector('h3 .abrir-detalhe');
+    abrirJanela(produtos.find(x => x.id === el.id));
+  };
+
+  const tituloBotao = document.createElement('button');
+  tituloBotao.type = 'button';
+  tituloBotao.className = 'abrir-detalhe';
+  tituloBotao.textContent = nome;
+  tituloBotao.addEventListener('click', abrir);
+  el.querySelector('h3').replaceChildren(tituloBotao);
+
+  const moldura = el.querySelector('.moldura');
+  moldura.classList.add('clicavel');
+  moldura.addEventListener('click', abrir);
+
+  const verDetalhes = document.createElement('button');
+  verDetalhes.type = 'button';
+  verDetalhes.className = 'ver-detalhes';
+  verDetalhes.textContent = 'Ver detalhes';
+  verDetalhes.addEventListener('click', abrir);
+  el.querySelector('.preco').before(verDetalhes);
 
   return {
     el,
@@ -1931,7 +2257,12 @@ async function copiarLink(id, nome) {
   // Na barra de endereço a gente troca só a parte do "?produto=",
   // sem mexer no domínio — senão o navegador reclama quando a
   // página está aberta de outro lugar.
-  history.replaceState({ produto: id }, "", '?produto=' + encodeURIComponent(id));
+  // O mesmo cuidado da janela: no arquivo local isto estoura, e
+  // antes o erro acontecia FORA do try — ou seja, derrubava o
+  // "Copiar link" inteiro antes mesmo de tentar copiar.
+  try {
+    history.replaceState({ produto: id }, "", '?produto=' + encodeURIComponent(id));
+  } catch { /* endereço travado: o link copiado continua certo */ }
   try {
     await navigator.clipboard.writeText(url);
     mostrarAviso("Link copiado 🌷");
@@ -1956,14 +2287,222 @@ function abrirProduto(id, rolar) {
   return true;
 }
 
+/* ---------- A PÁGINA DO PRODUTO ----------
+   Uma janela só, reaproveitada pra todos. Ela é montada na hora,
+   copiando os pedaços do card que a cliente clicou.
+
+   Por que COPIAR (cloneNode) e não mover os pedaços pra dentro da
+   janela? Porque mover deixaria o card oco enquanto a janela
+   estivesse aberta — e o card está bem ali atrás. Copiar custa
+   quase nada e a página fica inteira o tempo todo.               */
+const janela = document.getElementById('janela-produto');
+const janelaConteudo = document.getElementById('janela-conteudo');
+let quemAbriuAJanela = null;
+let fechandoPeloHistorico = false;
+
+/* ---------- AS OUTRAS FOTOS DO PRODUTO ----------
+   A regra de nome é a mesma da foto principal, com um número
+   colado no fim:
+
+       fotos/medicube-zero-pore-pad.jpg     ← a do card
+       fotos/medicube-zero-pore-pad-2.jpg   ← a segunda
+       fotos/medicube-zero-pore-pad-3.jpg   ← a terceira
+
+   A busca para no primeiro número que não existe. Ou seja: se
+   você tiver a -2 e a -4 mas esquecer a -3, a -4 não vai
+   aparecer. É de propósito — assim a galeria nunca tem buraco.
+
+   E repare QUANDO isto roda: só no clique, quando a janela abre.
+   Se as outras fotos fossem procuradas no carregamento da
+   página, cada produto pediria uma dúzia de imagens que quase
+   ninguém ia ver — e a vitrine, que é o que importa, demoraria
+   mais pra aparecer no celular da cliente.                      */
+function existeImagem(caminho) {
+  return new Promise((responde) => {
+    const teste = new Image();
+    teste.onload = () => responde(true);
+    teste.onerror = () => responde(false);
+    teste.src = caminho;
+  });
+}
+
+async function fotosDoProduto(p) {
+  if (p.galeria) return p.galeria;      // já procurou uma vez, não procura de novo
+  const lista = [];
+  const principal = p.el.querySelector('.moldura img');
+  if (principal) lista.push(principal.getAttribute('src'));
+
+  for (let n = 2; n <= 8; n++) {
+    let achada = null;
+    for (const ext of EXTENSOES) {
+      const caminho = `fotos/${p.id}-${n}.${ext}`;
+      if (await existeImagem(caminho)) { achada = caminho; break; }
+    }
+    if (!achada) break;
+    lista.push(achada);
+  }
+  p.galeria = lista;
+  return lista;
+}
+
+function montarGaleria(p) {
+  const galeria = document.createElement('div');
+  galeria.className = 'galeria';
+
+  const palco = document.createElement('div');
+  palco.className = 'moldura';
+  const grande = document.createElement('img');
+  grande.alt = p.nome;
+  const semFoto = p.el.querySelector('.moldura img');
+  if (semFoto) {
+    grande.src = semFoto.getAttribute('src');
+    palco.classList.add('com-foto');
+    palco.appendChild(grande);
+  } else {
+    const recado = document.createElement('span');
+    recado.className = 'sem-foto';
+    recado.textContent = 'foto do produto';
+    palco.appendChild(recado);
+  }
+
+  const tiras = document.createElement('div');
+  tiras.className = 'galeria-miniaturas';
+  galeria.append(palco, tiras);
+
+  // As miniaturas chegam depois, quando a procura terminar. A
+  // janela não espera por elas: a foto principal já está na tela.
+  fotosDoProduto(p).then((fotos) => {
+    if (fotos.length < 2) return;       // uma foto só não é galeria
+    tiras.replaceChildren(...fotos.map((caminho, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'mini' + (i === 0 ? ' escolhida' : '');
+      b.setAttribute('aria-label', `Ver foto ${i + 1} de ${fotos.length}`);
+      b.innerHTML = `<img src="${caminho}" alt="" loading="lazy">`;
+      b.addEventListener('click', () => {
+        grande.src = caminho;
+        tiras.querySelectorAll('.mini').forEach(m => m.classList.remove('escolhida'));
+        b.classList.add('escolhida');
+      });
+      return b;
+    }));
+  });
+
+  return galeria;
+}
+
+function montarJanela(p) {
+  const el = p.el;
+  const copia = (sel) => el.querySelector(sel)?.cloneNode(true) || null;
+
+  // O <h3> do card vira <h2> na janela: dentro dela, o nome do
+  // produto é o título principal, e a ordem dos títulos é como
+  // quem usa leitor de tela entende a hierarquia da página.
+  const titulo = document.createElement('h2');
+  titulo.id = 'janela-titulo';
+  titulo.textContent = p.nome;
+
+  const acoes = document.createElement('div');
+  acoes.className = 'janela-acoes';
+  const zap = copia('.botao');            // já vem com o link do WhatsApp pronto
+  const link = document.createElement('button');
+  link.type = 'button';
+  link.className = 'compartilhar';
+  link.innerHTML = el.querySelector('.compartilhar').innerHTML;
+  link.addEventListener('click', () => copiarLink(p.id, p.nome));
+  acoes.append(zap, link);
+
+  janelaConteudo.replaceChildren(
+    ...[montarGaleria(p), copia('.categoria-produto'), titulo,
+        copia('.marca-produto'), copia('.descricao'), copia('.preco'),
+        copia('.recomendacao'), copia('.detalhe'), acoes].filter(Boolean)
+  );
+  janelaConteudo.scrollTop = 0;
+}
+
+function abrirJanela(p, mudarEndereco = true) {
+  montarJanela(p);
+
+  // A JANELA ABRE PRIMEIRO, O ENDEREÇO MUDA DEPOIS — e a ordem
+  // aqui não é gosto, é uma cicatriz.
+  //
+  // Quando alguém abre este arquivo direto do computador (aquele
+  // endereço "file:///Users/..."), o navegador PROÍBE trocar o
+  // endereço da página. O history.pushState estoura um erro. Como
+  // ele vinha antes, o erro derrubava a função no meio e a janela
+  // nunca chegava a abrir: no navegador de verdade funcionava, e
+  // no arquivo local o clique no produto simplesmente não fazia
+  // nada. É o tipo de defeito que passa despercebido, porque
+  // quem programa testa publicado e quem só olha o arquivo acha
+  // que o site está quebrado.
+  //
+  // Agora a janela abre sempre. Se o endereço não puder mudar, o
+  // único prejuízo é o botão Voltar não fechar a janela — o X e o
+  // Esc continuam fechando.
+  if (!janela.open) janela.showModal();
+
+  if (mudarEndereco) {
+    try {
+      history.pushState({ produto: p.id }, "", '?produto=' + encodeURIComponent(p.id));
+    } catch {
+      /* endereço travado (arquivo local): segue sem ele */
+    }
+  }
+}
+
+/* O BOTÃO VOLTAR TEM QUE FECHAR A JANELA.
+   No celular, voltar é o gesto natural pra sair de uma tela. Se o
+   Voltar levasse a cliente pra fora do site em vez de fechar a
+   janela, ela sairia da loja sem querer.
+
+   O truque: abrir a janela EMPILHA um endereço novo (o do
+   produto). Aí o Voltar do navegador desempilha, o popstate
+   dispara, e a gente fecha a janela. E fechar pelo X ou pelo Esc
+   chama history.back() de propósito, pra que os dois caminhos
+   deixem o histórico do mesmo jeito — senão o Voltar precisaria
+   ser apertado duas vezes.
+
+   A bandeirinha "fechandoPeloHistorico" evita a mordida de
+   cachorro no próprio rabo: quando quem fecha a janela é o
+   popstate, não podemos chamar history.back() de novo.          */
+janela.addEventListener('close', () => {
+  if (!fechandoPeloHistorico && new URLSearchParams(location.search).get('produto')) {
+    history.back();
+  }
+  fechandoPeloHistorico = false;
+  quemAbriuAJanela?.focus();      // o foco volta pro card de onde saiu
+  quemAbriuAJanela = null;
+});
+
+janela.querySelector('.janela-fechar').addEventListener('click', () => janela.close());
+
+// Clique no fundo escuro também fecha. O <dialog> não faz isso
+// sozinho: o clique no ::backdrop chega como um clique no
+// próprio <dialog>, então é só conferir se foi FORA do conteúdo.
+janela.addEventListener('click', (e) => {
+  if (e.target === janela) janela.close();
+});
+
 function lerURL(rolar) {
   const params = new URLSearchParams(window.location.search);
   const id = params.get('produto') || (location.hash ? location.hash.slice(1) : "");
-  if (id) abrirProduto(id, rolar);
+  if (!id) return;
+  const alvo = produtos.find(p => p.id === id);
+  if (!alvo) return;
+  abrirProduto(id, rolar);
+  abrirJanela(alvo, false);   // o endereço já é o do produto: não empilha de novo
 }
 
-// O botão Voltar navega DENTRO do site em vez de expulsar
-window.addEventListener('popstate', () => lerURL(true));
+window.addEventListener('popstate', () => {
+  const id = new URLSearchParams(location.search).get('produto');
+  const alvo = id && produtos.find(p => p.id === id);
+  if (alvo) {
+    abrirJanela(alvo, false);
+  } else if (janela.open) {
+    fechandoPeloHistorico = true;
+    janela.close();
+  }
+});
 
 /* ---------- O QUE VEM DO STORE_CONFIG ---------- */
 
