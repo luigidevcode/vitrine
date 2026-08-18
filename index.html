@@ -2123,7 +2123,12 @@ const produtos = [...grade.querySelectorAll('.card')].map((el) => {
 
   // Tenta achar a foto de verdade deste produto (veja a função
   // logo abaixo). Se achar, ela entra no lugar do recadinho.
-  procurarFoto(el, el.id, nome);
+  // Produto com tamanhos mostra no card a foto do PRIMEIRO
+  // tamanho — que é o que a janela também abre. Se o card usasse
+  // um arquivo e a janela outro, a foto grande piscava: aparecia
+  // a do card e um instante depois era trocada pela do tamanho.
+  // Usando o mesmo arquivo, ela já está no cache e não pisca.
+  procurarFoto(el, tamanhos.length ? `${el.id}-${tamanhos[0].apelido}` : el.id, nome);
 
   // O botãozinho de compartilhar, criado só quando tem JS
   const compartilhar = document.createElement('button');
@@ -2535,13 +2540,40 @@ function lerTamanhos(texto) {
    página, cada produto pediria uma dúzia de imagens que quase
    ninguém ia ver — e a vitrine, que é o que importa, demoraria
    mais pra aparecer no celular da cliente.                      */
-function existeImagem(caminho) {
-  return new Promise((responde) => {
-    const teste = new Image();
-    teste.onload = () => responde(true);
-    teste.onerror = () => responde(false);
-    teste.src = caminho;
-  });
+/* "ESSA FOTO EXISTE?" — DE DOIS JEITOS, E O MOTIVO IMPORTA.
+
+   O jeito antigo era criar uma <img> escondida e ver se ela
+   carregava. Funciona em qualquer lugar, inclusive com o arquivo
+   aberto direto do computador. Só que ele BAIXA A FOTO INTEIRA
+   só pra responder "sim" ou "não" — e a resposta demora o tempo
+   de baixar uns 70 KB. Com quatro fotos no 4G, era mais de um
+   segundo esperando por uma pergunta que é sim/não.
+
+   O jeito novo é o método HEAD: ele pede ao servidor só a
+   ETIQUETA do arquivo, sem o conteúdo. A resposta são uns poucos
+   bytes e volta na hora. Aí as fotos de verdade entram como
+   <img loading="lazy">, e o navegador baixa cada uma quando ela
+   for aparecer — na ordem que ele achar melhor, mostrando uma
+   por uma em vez de todas juntas no fim.
+
+   E por que o jeito antigo continua aqui? Porque o HEAD é um
+   pedido de REDE, e não existe rede quando o arquivo é aberto
+   pelo "file:///" — ali o fetch estoura. Então a gente tenta o
+   rápido e, se ele não puder rodar, cai no que sempre funciona.
+   É o mesmo princípio do resto do arquivo: o caminho bom quando
+   dá, o caminho garantido sempre.                              */
+async function existeImagem(caminho) {
+  try {
+    const r = await fetch(caminho, { method: 'HEAD' });
+    return r.ok;
+  } catch {
+    return new Promise((responde) => {
+      const teste = new Image();
+      teste.onload = () => responde(true);
+      teste.onerror = () => responde(false);
+      teste.src = caminho;
+    });
+  }
 }
 
 async function fotosDoProduto(p, tamanho) {
@@ -2551,41 +2583,90 @@ async function fotosDoProduto(p, tamanho) {
   // nenhum, sem o site quebrar.
   const base = tamanho ? `${p.id}-${tamanho.apelido}` : p.id;
   p.galerias = p.galerias || {};
+
+  /* GUARDAR A PROMESSA, NÃO O RESULTADO.
+     Parece um detalhe e não é. Ao abrir um produto com tamanhos,
+     esta função era chamada DUAS vezes quase ao mesmo tempo: uma
+     pela galeria ao nascer, outra pela escolha do primeiro
+     tamanho. Guardando só o resultado, a segunda chamada chegava
+     antes de a primeira terminar, via a gaveta ainda vazia e
+     saía procurando tudo de novo — o dobro dos pedidos de rede
+     pra descobrir exatamente a mesma coisa.
+     Guardando a PROMESSA, a segunda chamada encontra a procura
+     já em andamento e simplesmente espera por ela.             */
   if (p.galerias[base]) return p.galerias[base];
+  p.galerias[base] = (async () => {
+
+  /* PERGUNTAR TUDO DE UMA VEZ, EM VEZ DE UM DE CADA VEZ.
+
+     A primeira versão disto era uma fila indiana: perguntava pela
+     foto 2, esperava a resposta, perguntava pela 3, esperava... e
+     pra saber que a galeria tinha acabado, testava as quatro
+     extensões da vaga seguinte, uma de cada vez. Numa galeria de
+     quatro fotos davam SETE idas e voltas até a rede, quatro
+     delas só pra ouvir "não existe".
+
+     No computador com internet boa isso não aparece. No 4G, cada
+     ida e volta custa uns 300 ms — e as miniaturas demoravam
+     QUATRO SEGUNDOS pra aparecer. A foto grande estava lá em
+     75 ms (ela vem do card, já carregada), então dava aquela
+     sensação esquisita de página meio pronta.
+
+     Agora as seis vagas são perguntadas ao mesmo tempo. O
+     navegador dispara tudo junto e a resposta chega numa ida só.
+
+     Por que só .jpg na primeira leva? Porque perguntar as quatro
+     extensões de seis vagas seriam 24 pedidos, quase todos "não
+     existe" — rápido, mas um desperdício de dados no celular da
+     cliente. O .jpg é o que a instrução manda usar, então ele
+     acerta de primeira em quase todo caso; as outras extensões
+     ficam pra segunda leva, que só acontece se precisar.       */
+  const MAX = 6;
+  const vagas = await Promise.all(
+    Array.from({ length: MAX }, (_, i) => acharFoto(base, i + 1, true))
+  );
+
+  /* SEGUNDA LEVA: confirmar o buraco.
+     Uma vaga vazia na primeira leva pode ser uma foto .png em vez
+     de .jpg. Antes de aceitar que a galeria acabou ali, a gente
+     confere aquela vaga nas outras extensões. Sem isto, quem
+     salvasse as fotos em .png veria a galeria parar sem motivo —
+     e não teria como adivinhar o porquê.                        */
+  for (let i = 0; i < MAX; i++) {
+    if (vagas[i]) continue;
+    vagas[i] = await acharFoto(base, i + 1, false);
+    if (!vagas[i]) break;       // agora sim: acabou de verdade
+  }
 
   const lista = [];
-
-  /* A CONTAGEM COMEÇA NA PRINCIPAL, e essa escolha tem história.
-
-     Antes esta função pegava a foto principal pronta do card e só
-     procurava da -2 em diante. Funcionava no clique — e falhava
-     em quem chegasse pelo LINK DIRETO de um produto (que é
-     justamente como a cliente chega, pelo link que ela mandou no
-     zap). Motivo: nesse caminho a janela abre no carregamento da
-     página, antes de a foto do card ter sido encontrada. A
-     galeria então nascia sem a primeira foto: quem clicava via
-     quatro, quem vinha pelo link via três.
-
-     Agora a procura é a mesma pros dois caminhos: n=1 é a foto
-     sem número, n=2 em diante são as outras. Custa nada, porque
-     a principal já está no cache do navegador.                  */
-  for (let n = 1; n <= 8; n++) {
-    const sufixo = n === 1 ? '' : `-${n}`;
-    let achada = null;
-    for (const ext of EXTENSOES) {
-      const caminho = `fotos/${base}${sufixo}.${ext}`;
-      if (await existeImagem(caminho)) { achada = caminho; break; }
-    }
-    if (!achada) break;    // buraco na sequência: a galeria para aqui
-    lista.push(achada);
+  for (const vaga of vagas) {
+    if (!vaga) break;           // buraco na sequência: a galeria para aqui
+    lista.push(vaga);
   }
 
   // Tamanho sem foto própria usa as fotos normais do produto, em
   // vez de ficar sem foto nenhuma.
   if (!lista.length && tamanho) return fotosDoProduto(p, null);
 
-  p.galerias[base] = lista;
   return lista;
+  })();
+  return p.galerias[base];
+}
+
+/* Procura UMA vaga da galeria, testando as extensões ao mesmo
+   tempo e ficando com a de maior prioridade que existir — a
+   ordem do EXTENSOES manda, não quem responder primeiro. Senão a
+   foto que aparece dependeria de qual resposta chegou antes, o
+   que muda a cada carregamento. */
+async function acharFoto(base, n, soJpg) {
+  const sufixo = n === 1 ? '' : `-${n}`;
+  // Na segunda leva o .jpg é pulado: a primeira leva já perguntou
+  // por ele e ouviu não. Perguntar de novo é um pedido jogado fora.
+  const extensoes = soJpg ? ['jpg'] : EXTENSOES.filter(e => e !== 'jpg');
+  const caminhos = extensoes.map(ext => `fotos/${base}${sufixo}.${ext}`);
+  const existem = await Promise.all(caminhos.map(existeImagem));
+  const i = existem.findIndex(Boolean);
+  return i === -1 ? null : caminhos[i];
 }
 
 function montarGaleria(p) {
