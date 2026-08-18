@@ -1154,7 +1154,7 @@
            Ele é a rede de segurança pra quem está sem JavaScript.
            Mantenha igual ao STORE_CONFIG.whatsapp lá embaixo. -->
       <a class="botao botao-cheio" id="zap-principal"
-         href="https://wa.me/5562991427633?text=Oi!%20Vim%20pelo%20site%20%3A)">Chamar no WhatsApp</a>
+         href="https://wa.me/5562991427633?text=Oi%21%20Vim%20pelo%20site%20%3A%29%0Ahttps%3A//luigidevcode.github.io/vitrine/">Chamar no WhatsApp</a>
 
       <div class="colunas">
         <div>
@@ -1203,6 +1203,7 @@
    o Instagram, se ficar vazio, some do rodapé sozinho.          */
 const STORE_CONFIG = {
   nome: "Vitrine",                 // TROQUE AQUI: o nome da marca
+  site: "https://luigidevcode.github.io/vitrine/",  // TROQUE AQUI se mudar de endereço
   whatsapp: "5562991427633",       // TROCAR PELO WHATSAPP REAL (55 + DDD + número)
   instagram: ""                    // TROQUE AQUI: só o @, sem o link. Vazio = não aparece
 };
@@ -1307,8 +1308,14 @@ const produtos = [...grade.querySelectorAll('.card')].map((el) => {
   // qualquer produto novo, ela precisa funcionar nos dois
   // gêneros — então a gente escreve de um jeito que não precisa
   // escolher. Um probleminha de português resolvido no texto. ;)
-  el.querySelector('.botao').href =
-    linkZap(`Oi! Vi no site e queria saber mais sobre: ${nome} 🌷`);
+  // A mensagem leva o LINK DO PRODUTO junto. Assim, quando a
+  // conversa abre, dá pra clicar e ver na hora de qual produto a
+  // cliente está falando — sem ficar perguntando "qual mesmo?".
+  // O \n é uma quebra de linha: o link fica sozinho embaixo, que
+  // é como o WhatsApp gosta pra deixar ele clicável.
+  el.querySelector('.botao').href = linkZap(
+    `Oi! Vi no site e queria saber mais sobre: ${nome} 🌷\n${urlDoProduto(el.id)}`
+  );
 
   // Tenta achar a foto de verdade deste produto (veja a função
   // logo abaixo). Se achar, ela entra no lugar do recadinho.
@@ -1491,16 +1498,22 @@ function mostrarAviso(texto) {
   sumirAviso = setTimeout(() => aviso.classList.remove('aparecendo'), 2600);
 }
 
+// O endereço público de um produto. Repare que ele NÃO vem de
+// onde a página está aberta, e sim do STORE_CONFIG. Se viesse de
+// window.location, quem abrisse o arquivo direto do computador
+// copiaria um link "file:///Users/..." — que não abre pra mais
+// ninguém no mundo. Assim o link é sempre o do site publicado.
 function urlDoProduto(id) {
-  const u = new URL(window.location.href);
-  u.hash = "";
-  u.searchParams.set('produto', id);
-  return u.toString();
+  const base = STORE_CONFIG.site.endsWith('/') ? STORE_CONFIG.site : STORE_CONFIG.site + '/';
+  return base + '?produto=' + encodeURIComponent(id);
 }
 
 async function copiarLink(id, nome) {
-  const url = urlDoProduto(id);
-  history.replaceState({ produto: id }, "", url);
+  const url = urlDoProduto(id);          // o link público, pra mandar pra alguém
+  // Na barra de endereço a gente troca só a parte do "?produto=",
+  // sem mexer no domínio — senão o navegador reclama quando a
+  // página está aberta de outro lugar.
+  history.replaceState({ produto: id }, "", '?produto=' + encodeURIComponent(id));
   try {
     await navigator.clipboard.writeText(url);
     mostrarAviso("Link copiado 🌷");
@@ -1542,10 +1555,14 @@ document.querySelectorAll('[data-marca-nome]').forEach(el => {
 });
 
 // Todo link com data-zap vira um link de WhatsApp de verdade
+// Os botões gerais (topo, rodapé, o flutuante) levam o link do
+// site. Mesma ideia: a conversa já começa mostrando de onde a
+// pessoa veio.
 document.querySelectorAll('[data-zap]').forEach(el => {
-  el.href = linkZap(el.dataset.zap);
+  el.href = linkZap(el.dataset.zap + "\n" + STORE_CONFIG.site);
 });
-document.getElementById('zap-principal').href = linkZap("Oi! Vim pelo site :)");
+document.getElementById('zap-principal').href =
+  linkZap("Oi! Vim pelo site :)\n" + STORE_CONFIG.site);
 
 // As categorias do rodapé nascem dos produtos também
 document.getElementById('rodape-categorias').replaceChildren(
