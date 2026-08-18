@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<!-- Este arquivo NÃO é o site. Ele existe só pra gerar o preview.jpg,
+     que é a imagem que aparece quando alguém cola o link do site numa
+     conversa do WhatsApp. Mudou o nome ou a frase? Edite aqui e gere
+     a imagem de novo com o comando que está no fim do arquivo. -->
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Prata&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ width:1200px; height:630px; overflow:hidden;
+        background:#FDF8F6; font-family:'Figtree',sans-serif; color:#46363D;
+        position:relative; display:flex; align-items:center; }
+  body::before{ content:""; position:absolute; inset:-30% -10% auto -10%; height:130%;
+                background:radial-gradient(closest-side,#F6E3DF,transparent 72%); }
+  .dentro{ position:relative; padding:0 84px; max-width:820px; }
+  .arco{ width:76px; height:96px; background:#75452C;
+         border-radius:999px 999px 10px 10px; margin-bottom:34px; }
+  h1{ font-family:'Prata',serif; font-weight:400; color:#5C2E3E;
+      font-size:60px; line-height:1.14; margin-bottom:26px; }
+  p{ font-size:25px; line-height:1.5; max-width:26ch; }
+  .marca{ position:absolute; right:84px; bottom:64px; text-align:right; }
+  .marca b{ font-family:'Prata',serif; font-weight:400; color:#5C2E3E; font-size:31px; display:block; }
+  .marca small{ font-size:16px; letter-spacing:.14em; text-transform:uppercase; color:#75452C; }
+</style>
+</head>
+<body>
+  <div class="dentro">
+    <div class="arco"></div>
+    <!-- TROQUE AQUI: a frase principal -->
+    <h1>Eu testo, comparo e só indico o que realmente funciona.</h1>
+    <p>Uma seleção de produtos de beleza escolhidos um a um.</p>
+  </div>
+  <div class="marca">
+    <!-- TROQUE AQUI: o nome da marca -->
+    <b>Vitrine</b>
+    <small>escolhido a dedo</small>
+  </div>
+</body>
+</html>
+<!-- PRA GERAR A IMAGEM DE NOVO, rode no Terminal, dentro desta pasta:
+
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  --headless=new --disable-gpu --hide-scrollbars \
+  --virtual-time-budget=6000 --window-size=1200,630 \
+  --screenshot=preview.png preview-fonte.html \
+&& sips -s format jpeg -s formatOptions 88 preview.png --out preview.jpg \
+&& rm preview.png
+-->

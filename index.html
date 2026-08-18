@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<!-- ============================================================
+     VITRINE — CATÁLOGO POR CATEGORIAS E FINALIDADES
+
+     Evolução do lume-beleza.html: a mesma cara (porcelana, blush,
+     rosa, amora, Prata e Figtree), agora com um catálogo de
+     verdade — categorias, finalidades, busca, ordenação e link
+     compartilhável por produto.
+
+     COMO ESTE ARQUIVO É ORGANIZADO
+     • Cada produto é UM bloco <article class="card"> escrito uma
+       vez só. Os dados dele (categoria, finalidades, preço...)
+       ficam nos atributos data-* do próprio bloco.
+     • O JavaScript LÊ esses blocos e monta os filtros sozinho.
+       Ninguém escreve a lista de categorias na mão.
+     • SEM JavaScript o catálogo inteiro continua na tela e os
+       botões do WhatsApp continuam funcionando — só os filtros
+       ficam escondidos. Ninguém fica sem ver os produtos.
+
+     PRA MEXER NO SITE, procure por "TROQUE AQUI":
+       1. o nome da marca e o WhatsApp ficam no STORE_CONFIG,
+          lá no comecinho do JavaScript
+       2. os produtos ficam na seção "TODOS OS PRODUTOS"
+     ============================================================ -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- ⚠️ O NOME DA MARCA APARECE EM 3 LUGARES AQUI EM CIMA.
+       Por que não vem do STORE_CONFIG como o resto? Porque os
+       robôs do WhatsApp, do Google e do Instagram leem o <head>
+       ANTES do JavaScript rodar. O que está no STORE_CONFIG eles
+       não enxergam. Então estas três linhas são escritas na mão:
+       o <title>, o og:title e o og:site_name. TROQUE AQUI. -->
+  <title>Vitrine — beleza escolhida produto por produto</title>
+  <meta name="description" content="Uma seleção de produtos de beleza escolhidos um a um. Skincare, cabelo, maquiagem, perfumes e corpo. Peça pelo WhatsApp.">
+  <meta name="theme-color" content="#FDF8F6">
+
+  <!-- O ÍCONE DA ABINHA (favicon).
+       Agora é a logo de verdade: o selo YB, já recortado em
+       redondinho. Ela vai escrita aqui dentro mesmo, em código
+       (base64), então não depende de arquivo separado e nunca
+       aparece quebrada. A segunda linha é o ícone de quando alguém
+       salva o site na tela inicial do celular — essa vai quadrada,
+       com o fundo rosa, que é como o iPhone gosta (ele mesmo
+       arredonda os cantos). -->
+  <link rel="icon" type="image/png" href="data:image/png;base64,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">
+  <link rel="apple-touch-icon" href="data:image/jpeg;base64,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">
+
+  <!-- ========================================================
+       O CARTÃO QUE APARECE QUANDO ALGUÉM COLA O LINK NO ZAP
+
+       Quando você manda o endereço do site numa conversa, o
+       WhatsApp monta um cartãozinho com imagem, título e
+       descrição. Como praticamente toda cliente vai chegar aqui
+       por um link mandado no zap, esse cartão é quase a vitrine.
+       Sem estas linhas, o link aparece pelado e parece spam.
+
+       ⬇️ TROQUE AQUI QUANDO ESCOLHER A HOSPEDAGEM ⬇️
+       Dê um Ctrl+F em SEU-ENDERECO-AQUI e troque em todas as
+       linhas que começam com <meta (esta explicação aqui pode
+       ficar como está). O endereço de verdade é tipo:
+           https://lumebeleza.com.br
+       Precisa ser o endereço COMPLETO, com https:// na frente —
+       caminho relativo não funciona aqui, é uma exigência dos
+       robôs que leem a página. E o preview.jpg tem que estar
+       publicado junto com o site, na mesma pasta.
+       ======================================================== -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:site_name" content="Vitrine">
+  <meta property="og:title" content="Eu testo, comparo e só indico o que realmente funciona.">
+  <meta property="og:description" content="Uma seleção de produtos de beleza escolhidos um a um — como uma indicação que eu faria para uma amiga.">
+  <meta property="og:url" content="https://SEU-ENDERECO-AQUI/">
+  <meta property="og:image" content="https://SEU-ENDERECO-AQUI/preview.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Eu testo, comparo e só indico o que realmente funciona.">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Fontes do Google: Prata (títulos elegantes) e Figtree (textos) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prata&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================
+       PARTE 1 — AS CORES (a mesma paleta de sempre)
+       ========================================================== */
+    :root{
+      --porcelana: #FDF8F6;   /* fundo geral, um branco rosadinho */
+      --blush:     #F6E3DF;   /* rosa clarinho das áreas de destaque */
+      --rosa:      #CE8B96;   /* rosa médio, DETALHES (leia o aviso!) */
+      --amora:     #5C2E3E;   /* vinho escuro, títulos e botão principal */
+      --tinta:     #46363D;   /* cor dos textos corridos */
+      --branco:    #FFFFFF;
+
+      /* O MARROM DA MARCA (vem do logotipo).
+         Ele é a cor de AÇÃO do site: tudo que a pessoa clica pra
+         seguir adiante é marrom. Os títulos continuam amora. */
+      --marrom-marca: #75452C;   /* botão parado      — branco por cima: 7.94 */
+      --marrom-hover: #613823;   /* mouse em cima     — branco por cima: 10.01 */
+      --marrom-claro: #98684C;   /* SÓ decoração! como letra em cima do
+                                    blush ele dá 3.84 e reprova. Serve pra
+                                    linha, sublinhado, detalhe. */
+
+      /* Verde do WhatsApp. Uma explicação honesta: o verde vivo
+         (#25D366) com letra branca em cima dá só 1.98 de contraste
+         — quem enxerga pouco não lê. Este tom mais fundo continua
+         sendo obviamente o WhatsApp e dá 5.41, que passa. */
+      --zap:       #0B7A44;
+    }
+
+    /* ⚠️ AVISO SOBRE O ROSA (regra importante deste arquivo)
+       O --rosa em cima do --porcelana dá 2.57 de contraste. Isso é
+       lindo numa LINHA, numa borda, num detalhezinho — e ilegível
+       numa LETRA. Então aqui o rosa é sempre decoração, nunca
+       texto, e nunca é o único jeito de saber que algo está
+       selecionado. Quem está selecionado ganha FUNDO amora com
+       letra porcelana: 10.41 de contraste, lê todo mundo. */
+
+    /* ==========================================================
+       PARTE 2 — REGRAS GERAIS
+       ========================================================== */
+    *{ box-sizing: border-box; margin: 0; padding: 0; }
+    html{ scroll-behavior: smooth; }
+
+    body{
+      background: var(--porcelana);
+      color: var(--tinta);
+      font-family: 'Figtree', sans-serif;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    /* Todos os títulos usam a fonte elegante */
+    h1, h2, h3{ font-family: 'Prata', serif; font-weight: 400; color: var(--amora); }
+
+    .container{ max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+
+    img{ max-width: 100%; display: block; }
+
+    /* O atributo "hidden" precisa vencer o display:flex dos cards */
+    [hidden]{ display: none !important; }
+
+    /* ACESSIBILIDADE: quem anda pelo teclado (tecla Tab) precisa
+       ver onde está. Esta é a moldurinha. O :focus-visible acende
+       no teclado e não no clique do mouse. */
+    a:focus-visible, button:focus-visible,
+    input:focus-visible, select:focus-visible{
+      outline: 3px solid var(--marrom-marca);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+    /* Cuidado com a moldurinha: o que importa não é a cor do
+       BOTÃO, é a cor de onde a moldurinha vai cair.
+       • No rodapé o fundo é amora (escuro), e a moldurinha fica
+         POR FORA — então ela precisa ser clara.
+       • No botão flutuante do WhatsApp a gente não sabe o que
+         vai estar passando atrás (ele flutua sobre a página
+         inteira). Por isso ali a moldurinha é DESENHADA POR
+         DENTRO (offset negativo): assim ela cai sempre no verde
+         do próprio botão e sempre dá pra ver.
+       Os botões escuros no meio do site continuam com a
+       moldurinha amora padrão, que cai no fundo porcelana. */
+    .rodape a:focus-visible{
+      outline-color: var(--porcelana);
+      outline-offset: 4px;
+    }
+    .zap:focus-visible{
+      outline-color: var(--porcelana);
+      outline-offset: -5px;
+    }
+
+    /* "Só com JS": os filtros dependem de JavaScript pra existir.
+       Sem JS eles ficam escondidos (não adianta mostrar um botão
+       que não faz nada), mas os PRODUTOS continuam todos na tela.
+
+       A regra é NEGATIVA de propósito: em vez de "com JS, mostre
+       assim", ela diz "sem JS, some". Assim cada elemento mantém
+       o display natural dele (block, flex...) e a gente não
+       precisa repetir isso aqui. O html:not(.com-js) também é
+       mais forte que uma classe sozinha, então nenhuma regra
+       escrita depois consegue reacender o que devia ficar oculto. */
+    html:not(.com-js) .so-com-js{ display: none; }
+
+    /* Pulinho pro conteúdo — o primeiro Tab de quem usa teclado */
+    .pular{
+      position: absolute; left: -9999px;
+      background: var(--marrom-marca); color: var(--branco);
+      padding: 12px 20px; border-radius: 0 0 12px 0; z-index: 60;
+    }
+    .pular:focus{ left: 0; top: 0; }
+
+    /* ==========================================================
+       PARTE 3 — CABEÇALHO
+       ========================================================== */
+    .topo{
+      position: sticky; top: 0;
+      background: rgba(253, 248, 246, .92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--blush);
+      z-index: 30;
+    }
+    .topo .container{
+      display: flex; align-items: center; gap: 18px;
+      height: 70px;
+    }
+    .marca{
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: 'Prata', serif; font-size: 23px;
+      color: var(--amora); text-decoration: none;
+      white-space: nowrap;
+    }
+    /* O selinho da logo. O border-radius redondo é cinto e
+       suspensório: a imagem já vem recortada em círculo, mas assim
+       ela continua redondinha até se um dia alguém trocar o
+       arquivo por uma versão quadrada. */
+    .logo-topo{ width: 42px; height: 42px; border-radius: 999px; }
+    /* O pontinho rosa é DECORAÇÃO, não texto: por isso ele nasce
+       de um ::after e não de uma letra de verdade. Assim ele
+       segue a regra da casa (rosa nunca é letra) e continua
+       exatamente igual na tela. Ele fica no <span> do nome (e não
+       no link inteiro) porque o link virou uma caixinha flex com
+       espacinho entre os itens — no link, o ponto se afastaria do
+       nome; no span, continua coladinho: "Vitrine." */
+    .marca span::after{ content: "."; color: var(--rosa); }
+
+    .topo nav{ margin-left: auto; display: flex; align-items: center; gap: 24px; }
+    .topo nav a{
+      color: var(--tinta); text-decoration: none;
+      font-weight: 500; font-size: 15px;
+      padding-bottom: 3px; border-bottom: 2px solid transparent;
+    }
+    .topo nav a:hover{ color: var(--amora); border-bottom-color: var(--rosa); }
+
+    /* Repare no ".topo nav" na frente: sem isso a regra
+       ".topo nav a" lá de cima (que é mais específica) ganhava
+       desta aqui e pintava a letra de escuro em cima do fundo
+       escuro. É o tipo de briga de CSS que só aparece testando. */
+    .topo nav a.zap-topo{
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--marrom-marca); color: var(--branco);
+      padding: 10px 18px; border-radius: 999px;
+      text-decoration: none; font-weight: 600; font-size: 14px;
+      white-space: nowrap;
+    }
+    .zap-topo svg{ width: 16px; height: 16px; fill: currentColor; }
+    .topo nav a.zap-topo:hover{ background: var(--marrom-hover); color: var(--branco); }
+
+    /* CELULAR: o menu vira dois links curtinhos e o botão some
+       (o botão flutuante lá embaixo já resolve o contato) */
+    @media (max-width: 760px){
+      .topo .container{ height: auto; padding-top: 12px; padding-bottom: 12px;
+                        flex-wrap: wrap; justify-content: center; gap: 10px; }
+      /* com o flex, quem centraliza é o justify-content
+         (o text-align antigo não morde em itens flex) */
+      .marca{ width: 100%; justify-content: center; font-size: 21px; }
+      .logo-topo{ width: 34px; height: 34px; }
+      .topo nav{ margin-left: 0; gap: 18px; }
+      .topo nav a{ font-size: 14px; white-space: nowrap; }
+      /* o seletor precisa ser tão específico quanto o de cima,
+         senão o botão não some — foi exatamente o que aconteceu
+         na primeira tentativa. */
+      .topo nav a.zap-topo{ display: none; }
+    }
+
+    /* ==========================================================
+       PARTE 4 — HERO
+       ========================================================== */
+    .hero{ position: relative; text-align: center; padding: 84px 0 76px; overflow: hidden; }
+    /* O brilho rosado atrás do texto (puro CSS, sem imagem!) */
+    .hero::before{
+      content: "";
+      position: absolute; inset: -40% -20% auto -20%;
+      height: 130%;
+      background: radial-gradient(closest-side, var(--blush), transparent 75%);
+      z-index: -1;
+    }
+    .hero .etiqueta{
+      display: inline-block;
+      background: var(--branco); color: var(--amora);
+      border: 1px solid var(--blush);
+      padding: 7px 18px; border-radius: 999px;
+      font-size: 13px; font-weight: 600; letter-spacing: .12em;
+      text-transform: uppercase; margin-bottom: 24px;
+    }
+    .hero h1{
+      font-size: clamp(30px, 5.4vw, 52px);
+      line-height: 1.18; max-width: 20ch; margin: 0 auto 20px;
+    }
+    .hero p{ max-width: 52ch; margin: 0 auto 34px; font-size: 18px; }
+
+    /* Botões em formato de pílula */
+    .botao{
+      display: inline-block;
+      padding: 15px 30px; border-radius: 999px;
+      text-decoration: none; font-weight: 600; font-size: 16px;
+      border: 0; cursor: pointer; font-family: inherit;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .botao:hover{ transform: translateY(-2px); }
+    /* Quando a pessoa APERTA, o botão desce de volta. É um
+       detalhezinho, mas é o que faz o clique "responder". */
+    .botao:active{ transform: translateY(0); }
+
+    .botao-cheio{
+      background: var(--marrom-marca); color: var(--branco);
+      box-shadow: 0 10px 24px rgba(117, 69, 44, .28);
+    }
+    .botao-cheio:hover{ background: var(--marrom-hover); }
+    .botao-cheio:active{ background: var(--marrom-hover); box-shadow: none; }
+
+    .botao-vazado{
+      color: var(--marrom-marca); background: transparent;
+      border: 1.5px solid var(--marrom-marca); margin-left: 10px;
+    }
+    /* No hover ele se enche do marrom e a letra vira branca:
+       7.94 de contraste, some qualquer dúvida de leitura. */
+    .botao-vazado:hover{
+      background: var(--marrom-marca); color: var(--branco);
+    }
+    .botao-vazado:active{ background: var(--marrom-hover); color: var(--branco); }
+
+    @media (max-width: 640px){
+      .hero{ padding: 56px 0 52px; }
+      .hero p{ font-size: 16px; }
+      .hero .botao{ display: block; max-width: 320px; margin: 0 auto 12px; }
+      .hero .botao-vazado{ margin-left: auto; }
+    }
+
+    /* ==========================================================
+       PARTE 5 — AS FITAS DE FILTRO (categorias e finalidades)
+
+       "Fita" porque no celular ela rola pro lado, feito uma
+       fitinha, em vez de quebrar em várias linhas bagunçadas.
+       Cada botão é um <button> de verdade (não um link), porque
+       a ação é filtrar e não navegar — isso importa pra quem usa
+       leitor de tela.
+       ========================================================== */
+    .filtros{
+      position: sticky; top: 70px;
+      background: var(--porcelana);
+      border-bottom: 1px solid var(--blush);
+      z-index: 20; padding: 16px 0 14px;
+    }
+    .fita{
+      display: flex; gap: 9px;
+      overflow-x: auto; scroll-snap-type: x proximity;
+      padding-bottom: 4px;
+      scrollbar-width: thin;
+    }
+    .fita::-webkit-scrollbar{ height: 5px; }
+    .fita::-webkit-scrollbar-thumb{ background: var(--blush); border-radius: 99px; }
+
+    .chip{
+      flex: 0 0 auto; scroll-snap-align: start;
+      background: var(--blush); color: var(--amora);
+      border: 1px solid transparent;
+      padding: 9px 18px; border-radius: 999px;
+      font-family: inherit; font-size: 14.5px; font-weight: 500;
+      cursor: pointer; white-space: nowrap;
+      transition: background-color .15s ease, color .15s ease;
+    }
+    .chip:hover{ border-color: var(--rosa); }
+    /* SELECIONADO: fundo escuro, letra clara. Dá 10.41 de
+       contraste e não depende de perceber cor nenhuma. */
+    .chip[aria-pressed="true"]{
+      background: var(--amora); color: var(--porcelana);
+      border-color: var(--amora); font-weight: 600;
+    }
+
+    /* A segunda fita (finalidades) é menorzinha e some quando a
+       categoria escolhida não tem finalidade nenhuma */
+    .fita-finalidades{ margin-top: 10px; }
+    .fita-finalidades .chip{
+      background: transparent; border-color: var(--blush);
+      font-size: 13.5px; padding: 7px 15px;
+    }
+    .fita-finalidades .chip:hover{ background: var(--blush); }
+    .fita-finalidades .chip[aria-pressed="true"]{
+      background: var(--amora); color: var(--porcelana); border-color: var(--amora);
+    }
+
+    @media (max-width: 760px){
+      .filtros{ top: 0; position: static; }
+    }
+
+
+    /* ==========================================================
+       PARTE 5b — FILTRO QUE FUNCIONA *SEM* JAVASCRIPT
+
+       Por que isso existe: quando alguém abre o arquivo pela
+       pré-visualização do celular, pelo Quick Look do Mac ou de
+       dentro do próprio WhatsApp, o JavaScript não roda. Aí as
+       bolinhas de filtro somem e a pessoa fica sem jeito de
+       escolher a categoria.
+
+       Aqui a gente resolve isso só com CSS, usando um truque
+       chamado :target. Funciona assim: cada link leva pra uma
+       marquinha invisível (<span id="cat-pele">). Quando o
+       endereço da página termina em #cat-pele, o CSS entende que
+       aquela marquinha virou "o alvo" e esconde todo card que
+       NÃO for de pele. Sem uma linha de JavaScript.
+
+       As duas versões nunca brigam: estas regras só valem no
+       html:not(.com-js), ou seja, só quando o JS não rodou. E os
+       links abaixo somem quando o JS está ligado, porque aí quem
+       manda são as bolinhas de verdade.
+       ========================================================== */
+    .filtros-sem-js{
+      display: flex; flex-wrap: wrap; gap: 9px;
+      margin: 4px 0 26px;
+    }
+    .filtros-sem-js a{
+      background: var(--blush); color: var(--amora);
+      padding: 9px 18px; border-radius: 999px;
+      text-decoration: none; font-size: 14.5px; font-weight: 500;
+    }
+    .filtros-sem-js a:hover{ background: var(--marrom-marca); color: var(--branco); }
+    /* a marquinha invisível que o link mira */
+    .alvo{ display: block; height: 0; overflow: hidden; }
+    /* com JavaScript ligado, quem filtra são as bolinhas — então
+       estes links extras somem pra não ficar filtro duplicado */
+    html.com-js .filtros-sem-js{ display: none; }
+
+    html:not(.com-js) #cat-cabelo:target ~ .grade .card:not([data-categoria="cabelo"]){ display: none; }
+    html:not(.com-js) #cat-corpo:target ~ .grade .card:not([data-categoria="corpo"]){ display: none; }
+    html:not(.com-js) #cat-maquiagem:target ~ .grade .card:not([data-categoria="maquiagem"]){ display: none; }
+    html:not(.com-js) #cat-pele:target ~ .grade .card:not([data-categoria="pele"]){ display: none; }
+    html:not(.com-js) #cat-perfumes:target ~ .grade .card:not([data-categoria="perfumes"]){ display: none; }
+
+    /* ==========================================================
+       PARTE 6 — BARRA DE BUSCA, ORDENAÇÃO E CONTADOR
+       ========================================================== */
+    .ferramentas{
+      display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+      margin: 30px 0 8px;
+    }
+    .campo-busca{ position: relative; flex: 1 1 260px; }
+    .campo-busca svg{
+      position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+      width: 17px; height: 17px; fill: var(--amora); opacity: .55;
+      pointer-events: none;
+    }
+    .campo-busca input{
+      width: 100%;
+      font-family: inherit; font-size: 15.5px; color: var(--tinta);
+      background: var(--branco);
+      border: 1px solid var(--blush); border-radius: 999px;
+      padding: 13px 18px 13px 42px;
+    }
+    .campo-busca input::placeholder{ color: var(--tinta); opacity: .6; }
+    .campo-busca input:focus{ outline-offset: 1px; }
+
+    .campo-ordem{ display: flex; align-items: center; gap: 8px; }
+    .campo-ordem label{ font-size: 14.5px; white-space: nowrap; }
+    .campo-ordem select{
+      font-family: inherit; font-size: 14.5px; color: var(--amora);
+      background: var(--branco);
+      border: 1px solid var(--blush); border-radius: 999px;
+      padding: 11px 16px; cursor: pointer;
+    }
+
+    .resumo{
+      display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+      margin-bottom: 28px; font-size: 15px;
+    }
+    .resumo .contagem{ color: var(--tinta); }
+    .limpar:hover{ color: var(--marrom-hover); }
+    .limpar{
+      background: none; border: 0; padding: 0;
+      font-family: inherit; font-size: 15px; font-weight: 600;
+      color: var(--marrom-marca); cursor: pointer;
+      text-decoration: underline;
+      text-decoration-color: var(--marrom-claro);
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
+    }
+
+    @media (max-width: 560px){
+      .ferramentas{ gap: 10px; }
+      .campo-ordem{ width: 100%; }
+      .campo-ordem select{ flex: 1; }
+    }
+
+    /* ==========================================================
+       PARTE 7 — A GRADE E OS CARDS
+       ========================================================== */
+    .catalogo{ padding: 10px 0 90px; }
+
+    .titulo-secao{
+      font-size: clamp(27px, 4.4vw, 38px);
+      margin-bottom: 10px;
+    }
+    .subtitulo-secao{ max-width: 56ch; margin-bottom: 4px; }
+
+    /* auto-FILL (e não auto-fit): com auto-fit, um resultado com
+       UM produto só esticaria aquele card pela largura inteira.
+       Com auto-fill a coluna guarda o tamanho e o card fica
+       bonitinho no canto, do mesmo tamanho dos outros. */
+    .grade{
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(228px, 1fr));
+      gap: 24px;
+    }
+
+    .card{
+      background: var(--branco);
+      border: 1px solid var(--blush);
+      border-radius: 22px;
+      padding: 14px 14px 22px;
+      text-align: center;
+      display: flex; flex-direction: column;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .card:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 16px 34px rgba(92, 46, 62, .12);
+    }
+
+    /* A janelinha em ARCO — a assinatura visual da casa.
+       A foto real entra com object-fit:contain, então a embalagem
+       aparece inteira, sem cortar e sem esticar. O tom de fundo
+       vem da categoria (o data-categoria lá no HTML). */
+    .moldura{
+      position: relative;
+      aspect-ratio: 4 / 5;
+      border-radius: 999px 999px 18px 18px;
+      background: var(--blush);
+      overflow: hidden;
+      margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .card[data-categoria="pele"]      .moldura{ background: #F6E3DF; }
+    .card[data-categoria="cabelo"]    .moldura{ background: #F7E9E0; }
+    .card[data-categoria="maquiagem"] .moldura{ background: #EFD5DA; }
+    .card[data-categoria="perfumes"]  .moldura{ background: #F2D8D8; }
+    .card[data-categoria="corpo"]     .moldura{ background: #F2DCD4; }
+
+    .moldura img{
+      width: 100%; height: 100%;
+      object-fit: contain;         /* nunca deforma a embalagem */
+      padding: 16% 14% 10%;
+    }
+    /* Enquanto não existe foto de verdade, um recadinho discreto */
+    .sem-foto{
+      color: var(--amora); font-size: 13.5px; font-weight: 500;
+      opacity: .75; padding: 0 12px;
+    }
+
+    /* A tarjinha de queridinho.
+       Ela fica no PÉ do arco, não no topo: lá em cima a curva do
+       arco corta o cantinho (o .moldura tem overflow:hidden pra
+       segurar a foto dentro do formato), e a tarjinha aparecia
+       mordida. Aqui embaixo o desenho é reto e nada corta. */
+    .selo{
+      position: absolute; bottom: 12px; left: 12px;
+      background: var(--amora); color: var(--porcelana);
+      font-size: 11.5px; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 5px 12px; border-radius: 999px;
+    }
+
+    .card .categoria-produto{
+      font-size: 12px; font-weight: 600; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--amora); opacity: .7;
+      margin-bottom: 5px;
+    }
+    .card h3{ font-size: 19px; line-height: 1.3; margin-bottom: 4px; }
+    .card .marca-produto{ font-size: 13.5px; opacity: .75; margin-bottom: 6px; }
+    .card .descricao{ font-size: 14.5px; line-height: 1.5; }
+
+    /* A RECOMENDAÇÃO DA YASMIN — é o coração do site.
+       Fica em itálico, entre aspas, sobre um fundinho blush, pra
+       ficar claro que ali é a voz dela e não texto de fabricante.
+       Se estiver vazia, o :empty faz o bloco sumir sozinho. */
+    .card .recomendacao{
+      font-style: italic; font-size: 14.5px; line-height: 1.55;
+      color: var(--amora);
+      background: var(--blush);
+      border-radius: 14px;
+      padding: 12px 14px; margin-top: 12px;
+      text-align: left;
+    }
+    .card .recomendacao:empty{ display: none; }
+    .card .recomendacao::before{ content: "“"; }
+    .card .recomendacao::after{ content: "”"; }
+    .card .marca-produto:empty{ display: none; }
+    .card .descricao:empty{ display: none; }
+
+    /* Truque de flexbox: o margin-top automático empurra o preço
+       (e o botão) pro pé do card. Assim os botões ficam alinhados
+       entre os cards mesmo com descrições de tamanhos diferentes. */
+    .card .preco{
+      font-size: 19px; font-weight: 600; color: var(--amora);
+      margin: 0 0 14px; margin-top: auto; padding-top: 14px;
+    }
+    .card .botao{ padding: 11px 24px; font-size: 15px; align-self: center; }
+
+    /* O link de compartilhar, discretinho no pé do card */
+    .compartilhar{
+      background: none; border: 0; cursor: pointer;
+      font-family: inherit; font-size: 12.5px; color: var(--tinta);
+      opacity: .7; margin-top: 8px;
+      display: inline-flex; align-items: center; gap: 6px;
+      align-self: center;
+      /* O padding não é enfeite: ele aumenta a ÁREA DE TOQUE.
+         Só a letra dava 14px de altura, e dedo não acerta 14px.
+         Com o padding vira ~32px, que já é confortável. */
+      padding: 9px 12px;
+    }
+    .compartilhar:hover{ opacity: 1; color: var(--amora); }
+    .compartilhar svg{ width: 13px; height: 13px; fill: currentColor; }
+
+    /* Quando alguém abre o site por um link de produto, o card
+       correspondente pisca de leve pra pessoa achar na hora */
+    .card.destacado{
+      border-color: var(--rosa);
+      box-shadow: 0 0 0 3px var(--blush), 0 16px 34px rgba(92, 46, 62, .14);
+    }
+
+    /* CELULAR: 2 colunas de cards compactos, estilo lojinha de
+       aplicativo. Só abaixo de 360px vira 1 coluna. */
+    @media (max-width: 640px){
+      .catalogo{ padding-bottom: 64px; }
+      .grade{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+      .card{ padding: 10px 10px 16px; border-radius: 18px; }
+      .card h3{ font-size: 15.5px; }
+      .card .categoria-produto{ font-size: 10.5px; }
+      .card .descricao{ font-size: 12.5px; }
+      .card .recomendacao{ font-size: 12.5px; padding: 10px 11px; border-radius: 12px; }
+      .card .preco{ font-size: 16px; padding-top: 10px; margin-bottom: 10px; }
+      .card .botao{ align-self: stretch; padding: 10px 8px; font-size: 14px; }
+      .selo{ font-size: 10px; padding: 4px 9px; bottom: 8px; left: 8px; }
+      .moldura{ margin-bottom: 12px; }
+      .compartilhar{ font-size: 11.5px; }
+    }
+
+    /* ==========================================================
+       PARTE 8 — ESTADO VAZIO (quando o filtro não acha nada)
+       Tela vazia sem explicação deixa a pessoa perdida. Então
+       aqui a gente diz o que houve e oferece uma saída.
+       ========================================================== */
+    .vazio{
+      text-align: center; padding: 60px 24px;
+      background: var(--branco);
+      border: 1px solid var(--blush); border-radius: 22px;
+    }
+    .vazio h3{ font-size: 22px; margin-bottom: 10px; }
+    .vazio p{ max-width: 44ch; margin: 0 auto 24px; }
+    .vazio .botao{ margin: 0 5px 10px; }
+
+    /* ==========================================================
+       PARTE 9 — CURADORIA, COMO COMPRAR E SOBRE
+       ========================================================== */
+    .curadoria{ background: var(--blush); padding: 72px 0; }
+    .curadoria .container{ max-width: 760px; text-align: center; }
+    .curadoria h2{ font-size: clamp(25px, 4vw, 34px); margin-bottom: 16px; }
+    .curadoria p{ font-size: 17.5px; }
+
+    .passos{ padding: 80px 0; }
+    .passos .titulo-secao{ text-align: center; margin-bottom: 44px; }
+    .passos-grade{
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 32px; text-align: center;
+    }
+    /* Aqui o 1-2-3 faz sentido de verdade: isso É uma sequência.
+       Numerar coisa que não é sequência é só enfeite. ;) */
+    .passo .numero{
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 44px; height: 44px; border-radius: 999px;
+      background: var(--blush); color: var(--amora);
+      font-family: 'Prata', serif; font-size: 19px;
+      margin-bottom: 14px;
+    }
+    .passo h3{ font-size: 19px; margin-bottom: 6px; }
+    .passo p{ font-size: 15px; }
+
+    .sobre{ padding: 20px 0 90px; }
+    .sobre .container{
+      display: grid; grid-template-columns: 1fr 1.4fr;
+      gap: 54px; align-items: center;
+    }
+    .sobre .retrato{
+      aspect-ratio: 4 / 5; max-width: 320px; margin: 0 auto;
+      border-radius: 999px 999px 18px 18px;
+      background: var(--blush);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--amora); font-size: 14px; font-weight: 500;
+    }
+    /* A logo dentro do arco. A imagem é redonda, com as beiradas
+       transparentes, então ela flutua no blush do arco sem aparecer
+       nenhuma emenda quadrada. A largura em porcentagem deixa um
+       respiro de moldura em volta. */
+    .sobre .retrato .logo-sobre{ width: 76%; height: auto; }
+    /* Deixado pronto pro futuro: quando a foto de verdade entrar
+       (veja o TROQUE AQUI na seção Sobre), o cover faz ela
+       preencher o arco inteirinho sem esticar nem deformar. */
+    .sobre img.retrato{ object-fit: cover; }
+    .sobre h2{ font-size: clamp(25px, 4.4vw, 32px); margin-bottom: 16px; }
+    .sobre p{ margin-bottom: 14px; }
+
+    @media (max-width: 760px){
+      .curadoria{ padding: 52px 0; }
+      .passos{ padding: 56px 0; }
+      .passos-grade{ gap: 26px; }
+      .sobre{ padding: 10px 0 64px; }
+      .sobre .container{ grid-template-columns: 1fr; gap: 28px; }
+      .sobre .retrato{ max-width: 240px; }
+    }
+
+    /* ==========================================================
+       PARTE 10 — RODAPÉ
+       ========================================================== */
+    .rodape{
+      background: var(--amora); color: var(--porcelana);
+      padding: 70px 0 34px;
+    }
+    .rodape h2{ color: var(--porcelana); font-size: clamp(24px, 4vw, 30px); margin-bottom: 12px; }
+    .rodape .frase{ max-width: 44ch; margin-bottom: 28px; opacity: .9; }
+    .rodape .colunas{
+      display: flex; flex-wrap: wrap; gap: 40px 64px;
+      padding-top: 34px; margin-top: 34px;
+      border-top: 1px solid rgba(253, 248, 246, .22);
+    }
+    .rodape h3{ color: var(--porcelana); font-size: 15px; font-family: 'Figtree', sans-serif;
+                font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+                margin-bottom: 12px; opacity: .8; }
+    .rodape ul{ list-style: none; }
+    .rodape li{ margin-bottom: 1px; }
+    /* inline-block + padding pra cada link do rodapé virar um
+       alvo de toque de verdade (~29px em vez de 18px) */
+    .rodape a{ color: var(--porcelana); text-decoration: none; font-size: 15px; }
+    .rodape li a{ display: inline-block; padding: 6px 0; }
+    .rodape a:hover{ text-decoration: underline; text-underline-offset: 4px; }
+    /* EXCEÇÃO IMPORTANTE: aqui o fundo é amora (escuro). Um botão
+       marrom em cima dele quase sumiria — marrom e amora têm
+       claridade parecidíssima (1.38 de contraste entre os dois).
+       Então neste único lugar o botão continua claro, com a LETRA
+       marrom: 7.54 de contraste e o botão se destaca do fundo. */
+    .rodape .botao-cheio{ background: var(--porcelana); color: var(--marrom-marca); box-shadow: none; }
+    .rodape .botao-cheio:hover{ background: var(--branco); color: var(--marrom-hover); }
+    .creditos{
+      margin-top: 34px; padding-top: 20px;
+      border-top: 1px solid rgba(253, 248, 246, .22);
+      font-size: 13.5px; opacity: .72;
+    }
+    /* Se o Instagram não estiver configurado, o item some sozinho */
+    .rodape li:empty{ display: none; }
+
+    @media (max-width: 640px){
+      .rodape{ padding: 56px 0 100px; }
+      .rodape .colunas{ gap: 30px 40px; }
+    }
+
+    /* ==========================================================
+       PARTE 11 — BOTÃO FLUTUANTE DO WHATSAPP
+       ========================================================== */
+    .zap{
+      position: fixed; right: 20px; bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
+      background: var(--zap); color: var(--branco);
+      padding: 13px 20px; border-radius: 999px;
+      text-decoration: none; font-weight: 600; font-size: 15px;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, .22);
+      transition: transform .15s ease;
+      z-index: 40;
+    }
+    .zap:hover{ transform: scale(1.05); }
+    .zap svg{ width: 20px; height: 20px; fill: currentColor; }
+
+    @media (max-width: 640px){
+      .zap{ padding: 15px; right: 16px; bottom: 16px; }
+      .zap .zap-texto{ display: none; }
+      .zap svg{ width: 24px; height: 24px; }
+    }
+
+    /* O avisinho de "link copiado" */
+    .aviso-copia{
+      position: fixed; left: 50%; bottom: 92px; transform: translateX(-50%);
+      background: var(--amora); color: var(--porcelana);
+      padding: 11px 22px; border-radius: 999px;
+      font-size: 14.5px; font-weight: 500;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s ease;
+      z-index: 50;
+    }
+    .aviso-copia.aparecendo{ opacity: 1; }
+
+    /* ==========================================================
+       PARTE 12 — QUEM PREFERE MENOS MOVIMENTO
+       Tem gente que sente desconforto com animação e marca isso
+       na configuração do próprio aparelho. Quando essa pessoa
+       chega, a gente desliga tudo. Duas linhas, muita diferença.
+       ========================================================== */
+    @media (prefers-reduced-motion: reduce){
+      html{ scroll-behavior: auto; }
+      *, *::before, *::after{
+        animation-duration: .001ms !important;
+        transition-duration: .001ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <a class="pular" href="#catalogo">Pular para os produtos</a>
+
+  <!-- ========================================================
+       CABEÇALHO
+       ======================================================== -->
+  <header class="topo">
+    <div class="container">
+      <!-- A LOGO no topo, como um selinho ao lado do nome.
+           Ela mora dentro do próprio código (em base64), então não
+           depende da pasta de fotos e nunca aparece quebrada.
+           O alt="" é de propósito: o nome da marca já está escrito
+           logo ao lado, então o leitor de tela fala o nome uma vez
+           só, em vez de "logo" e depois o nome de novo.
+           E repare que o nome agora vive num <span data-marca-nome>:
+           o JavaScript troca o TEXTO desse span pelo nome que está
+           no STORE_CONFIG — se o data-marca-nome ficasse no link
+           inteiro, essa troca apagaria a logo junto. -->
+      <a class="marca" href="#topo">
+        <img class="logo-topo" alt="" width="128" height="128"
+             src="data:image/webp;base64,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">
+        <span data-marca-nome>Vitrine</span>
+      </a>
+      <nav aria-label="Navegação principal">
+        <a href="#catalogo">Produtos</a>
+        <a href="#curadoria">A curadoria</a>
+        <a href="#sobre">Sobre</a>
+        <a class="zap-topo" href="#falar" data-zap="Oi! Vim pelo site e queria saber mais sobre os produtos.">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-2.9.8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.6-6.1c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.3-.7.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.4 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.8 2.8 4.5 3.9 1.7.7 2.3.8 3.1.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2 0-.1-.2-.2-.5-.3Z"/></svg>
+          Falar comigo
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="topo">
+
+    <!-- ======================================================
+         HERO — o diferencial daqui é a curadoria, não a vitrine
+         ====================================================== -->
+    <section class="hero">
+      <div class="container">
+        <span class="etiqueta">escolhido produto por produto</span>
+        <h1>Eu testo, comparo e só indico o que realmente funciona.</h1>
+        <p>Uma seleção de produtos de beleza que eu compraria de novo — do jeitinho que eu indicaria para uma amiga.</p>
+        <a class="botao botao-cheio" href="#catalogo">Ver todos os produtos</a>
+        <a class="botao botao-vazado" href="#falar" data-zap="Oi! Vim pelo site e queria conversar sobre os produtos.">Falar comigo</a>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         AS FITAS DE FILTRO
+         Elas nascem VAZIAS de propósito: o JavaScript lê os
+         produtos lá embaixo e monta os botões sozinho. Assim
+         nunca aparece um filtro que não tem produto nenhum.
+         ====================================================== -->
+    <div class="filtros so-com-js" id="filtros">
+      <div class="container">
+        <div class="fita" id="fita-categorias" role="group" aria-label="Filtrar por categoria"></div>
+        <div class="fita fita-finalidades" id="fita-finalidades" role="group" aria-label="Filtrar por finalidade"></div>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         O CATÁLOGO
+         ====================================================== -->
+    <section class="catalogo" id="catalogo" aria-labelledby="titulo-catalogo">
+      <div class="container">
+
+        <h2 class="titulo-secao" id="titulo-catalogo">Todos os produtos</h2>
+        <p class="subtitulo-secao">Uma seleção feita produto por produto.</p>
+
+        <!-- Busca e ordenação: só existem com JavaScript -->
+        <div class="ferramentas so-com-js">
+          <div class="campo-busca">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2a8 8 0 1 0 4.9 14.3l5.4 5.4 1.4-1.4-5.4-5.4A8 8 0 0 0 10 2Zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z"/></svg>
+            <label class="pular" for="busca">Buscar produtos</label>
+            <input type="search" id="busca" placeholder="Buscar produtos..."
+                   autocomplete="off" spellcheck="false">
+          </div>
+          <div class="campo-ordem">
+            <label for="ordem">Ordenar por</label>
+            <select id="ordem">
+              <option value="destaques">Destaques</option>
+              <option value="novidades">Novidades</option>
+              <option value="preco-menor">Menor preço</option>
+              <option value="preco-maior">Maior preço</option>
+              <option value="nome">Nome A–Z</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="resumo so-com-js">
+          <span class="contagem" id="contagem" aria-live="polite"></span>
+          <button class="limpar" id="limpar" type="button" hidden>Limpar filtros</button>
+        </div>
+
+        <!-- ┌────────────────────────────────────────────────┐
+             │  TROQUE AQUI — OS PRODUTOS                     │
+             │                                                 │
+             │  Cada <article> é UM produto. Pra adicionar,    │
+             │  copie um bloco inteiro, cole embaixo e troque  │
+             │  os textos. O resto (filtros, busca, contagem,  │
+             │  link do WhatsApp) se ajusta sozinho.           │
+             │                                                 │
+             │  O que cada atributo faz:                       │
+             │   id              → o link compartilhável       │
+             │                     (?produto=serum-vitamina-c) │
+             │   data-categoria  → pele, cabelo, maquiagem,    │
+             │                     perfumes ou corpo           │
+             │   data-finalidades→ pra que serve; pode ter     │
+             │                     VÁRIAS, separadas por espaço│
+             │   data-marca      → deixe vazio se não souber   │
+             │   data-preco      → só o número: 79.90          │
+             │   data-destaque   → 1 vira "queridinho"         │
+             │   data-novo       → 1 entra em "Novidades"      │
+             └────────────────────────────────────────────────┘ -->
+        <!-- Os filtros de reserva: só aparecem quando o JavaScript
+             não roda. Veja "PARTE 5b" lá no CSS. -->
+        <nav class="filtros-sem-js" aria-label="Filtrar por categoria">
+          <a href="#cat-todos">Todos</a>
+          <a href="#cat-cabelo">Cabelo</a>
+          <a href="#cat-corpo">Corpo</a>
+          <a href="#cat-maquiagem">Maquiagem</a>
+          <a href="#cat-pele">Pele</a>
+          <a href="#cat-perfumes">Perfumes</a>
+        </nav>
+        <span class="alvo" id="cat-todos"></span>
+        <span class="alvo" id="cat-cabelo"></span>
+        <span class="alvo" id="cat-corpo"></span>
+        <span class="alvo" id="cat-maquiagem"></span>
+        <span class="alvo" id="cat-pele"></span>
+        <span class="alvo" id="cat-perfumes"></span>
+
+        <div class="grade" id="grade">
+
+          <article class="card" id="serum-vitamina-c"
+                   data-categoria="pele"
+                   data-finalidades="luminosidade uniformizacao"
+                   data-marca=""
+                   data-preco="79.90"
+                   data-destaque="1"
+                   data-novo="0">
+            <div class="moldura">
+              <!-- A foto entra sozinha: basta existir o arquivo
+                   fotos/serum-vitamina-c.jpg (o mesmo nome do id
+                   deste produto). Veja "AS FOTOS" no JavaScript. -->
+              <span class="sem-foto">foto do produto</span>
+              <span class="selo">queridinho</span>
+            </div>
+            <p class="categoria-produto">Pele</p>
+            <h3>Sérum facial vitamina C</h3>
+            <p class="marca-produto"></p>
+            <p class="descricao">Pele iluminada e uniforme no dia a dia.</p>
+            <!-- TROQUE AQUI: a recomendação da Yasmin, em primeira pessoa.
+                 Enquanto estiver vazia, o bloco some sozinho. -->
+            <p class="recomendacao"></p>
+            <p class="preco">R$ 79,90</p>
+            <a class="botao botao-cheio" href="#falar">Quero esse</a>
+          </article>
+
+          <article class="card" id="kit-skincare-essencial"
+                   data-categoria="pele"
+                   data-finalidades="limpeza hidratacao protecao"
+                   data-marca=""
+                   data-preco="129.90"
+                   data-destaque="1"
+                   data-novo="0">
+            <div class="moldura">
+              <span class="sem-foto">foto do produto</span>
+              <span class="selo">queridinho</span>
+            </div>
+            <p class="categoria-produto">Pele</p>
+            <h3>Kit skincare essencial</h3>
+            <p class="marca-produto"></p>
+            <p class="descricao">Limpeza, hidratação e proteção em três passos.</p>
+            <p class="recomendacao"></p>
+            <p class="preco">R$ 129,90</p>
+            <a class="botao botao-cheio" href="#falar">Quero esse</a>
+          </article>
+
+          <article class="card" id="hidratante-corporal-karite"
+                   data-categoria="corpo"
+                   data-finalidades="hidratacao perfumar"
+                   data-marca=""
+                   data-preco="49.90"
+                   data-destaque="0"
+                   data-novo="0">
+            <div class="moldura">
+              <span class="sem-foto">foto do produto</span>
+            </div>
+            <p class="categoria-produto">Corpo</p>
+            <h3>Hidratante corporal karité</h3>
+            <p class="marca-produto"></p>
+            <p class="descricao">Toque macio e perfume suave o dia inteiro.</p>
+            <p class="recomendacao"></p>
+            <p class="preco">R$ 49,90</p>
+            <a class="botao botao-cheio" href="#falar">Quero esse</a>
+          </article>
+
+          <article class="card" id="perfume-floral-75ml"
+                   data-categoria="perfumes"
+                   data-finalidades="floral"
+                   data-marca=""
+                   data-preco="99.90"
+                   data-destaque="0"
+                   data-novo="1">
+            <div class="moldura">
+              <span class="sem-foto">foto do produto</span>
+            </div>
+            <p class="categoria-produto">Perfumes</p>
+            <h3>Perfume floral 75ml</h3>
+            <p class="marca-produto"></p>
+            <p class="descricao">Fragrância delicada pra marcar presença.</p>
+            <p class="recomendacao"></p>
+            <p class="preco">R$ 99,90</p>
+            <a class="botao botao-cheio" href="#falar">Quero esse</a>
+          </article>
+
+          <article class="card" id="mascara-capilar-reconstrutora"
+                   data-categoria="cabelo"
+                   data-finalidades="reconstrucao brilho"
+                   data-marca=""
+                   data-preco="39.90"
+                   data-destaque="0"
+                   data-novo="1">
+            <div class="moldura">
+              <span class="sem-foto">foto do produto</span>
+            </div>
+            <p class="categoria-produto">Cabelo</p>
+            <h3>Máscara capilar reconstrutora</h3>
+            <p class="marca-produto"></p>
+            <p class="descricao">Brilho e força dos fios em uma aplicação.</p>
+            <p class="recomendacao"></p>
+            <p class="preco">R$ 39,90</p>
+            <a class="botao botao-cheio" href="#falar">Quero esse</a>
+          </article>
+
+          <article class="card" id="batom-matte-longa-duracao"
+                   data-categoria="maquiagem"
+                   data-finalidades="labios longa-duracao"
+                   data-marca=""
+                   data-preco="34.90"
+                   data-destaque="0"
+                   data-novo="0">
+            <div class="moldura">
+              <span class="sem-foto">foto do produto</span>
+            </div>
+            <p class="categoria-produto">Maquiagem</p>
+            <h3>Batom matte longa duração</h3>
+            <p class="marca-produto"></p>
+            <p class="descricao">Cor intensa que fica no lugar até o fim do dia.</p>
+            <p class="recomendacao"></p>
+            <p class="preco">R$ 34,90</p>
+            <a class="botao botao-cheio" href="#falar">Quero esse</a>
+          </article>
+
+        </div><!-- fim da grade -->
+
+        <!-- Quando o filtro não acha nada -->
+        <div class="vazio" id="vazio" hidden>
+          <h3>Não encontrei nenhum produto com esses filtros.</h3>
+          <p>Tenta tirar algum filtro — ou me chama no WhatsApp que eu procuro pra você.</p>
+          <button class="botao botao-cheio" type="button" id="limpar-vazio">Limpar filtros</button>
+          <a class="botao botao-vazado" href="#falar" data-zap="Oi! Procurei um produto no site e não achei. Você me ajuda?">Falar comigo</a>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================
+         CURADORIA
+         ====================================================== -->
+    <section class="curadoria" id="curadoria" aria-labelledby="titulo-curadoria">
+      <div class="container">
+        <h2 id="titulo-curadoria">Por que está na minha vitrine?</h2>
+        <!-- TROQUE AQUI: o texto da curadoria, na voz dela -->
+        <p>Não quero colocar centenas de produtos aqui só pra aumentar o catálogo. A ideia é mostrar o que eu conheço, testei, compararia com outras opções e realmente indicaria. Se não passou por mim, não entra.</p>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         COMO COMPRAR — o processo real, sem inventar prazo,
+         frete nem forma de pagamento que ainda não existem.
+         ====================================================== -->
+    <section class="passos" aria-labelledby="titulo-passos">
+      <div class="container">
+        <h2 class="titulo-secao" id="titulo-passos">Como comprar</h2>
+        <div class="passos-grade">
+          <div class="passo">
+            <span class="numero" aria-hidden="true">1</span>
+            <h3>Escolha</h3>
+            <p>Encontre o produto que você gostou aqui na vitrine.</p>
+          </div>
+          <div class="passo">
+            <span class="numero" aria-hidden="true">2</span>
+            <h3>Me chama</h3>
+            <p>Clique em “Quero esse” e a conversa já abre falando dele.</p>
+          </div>
+          <div class="passo">
+            <span class="numero" aria-hidden="true">3</span>
+            <h3>Finalize</h3>
+            <p>A gente confirma disponibilidade, pagamento e entrega por lá.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         SOBRE
+         ====================================================== -->
+    <section class="sobre" id="sobre" aria-labelledby="titulo-sobre">
+      <div class="container">
+        <!-- Por enquanto quem mora no arco é a logo — ela está
+             escrita em base64 dentro do próprio código, sem depender
+             de pasta nenhuma. TROQUE AQUI quando tiver a foto dela:
+             apague este <div class="retrato"> inteiro e ponha no
+             lugar
+             <img class="retrato" src="fotos/yasmin.jpg" alt="Yasmin">
+             (o CSS já está pronto pra foto preencher o arco). -->
+        <div class="retrato">
+          <img class="logo-sobre" width="480" height="480"
+               alt="Selo da marca: monograma YB em dourado sobre um círculo rosa"
+               src="data:image/webp;base64,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">
+        </div>
+        <div>
+          <h2 id="titulo-sobre">Quem escolhe os produtos</h2>
+          <!-- TROQUE AQUI: a apresentação dela, em primeira pessoa -->
+          <p>Oi! 💛 A ideia desta vitrine é facilitar a escolha de produtos de beleza sem virar uma lista infinita de opções.</p>
+          <p>Cada produto daqui passou primeiro pela minha rotina: eu testo, comparo e só indico o que realmente funciona.</p>
+          <p>Me chama no WhatsApp que eu te ajudo a escolher o ideal pra sua pele, seu cabelo e seu momento — sem pressa e sem empurrar nada.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================
+       RODAPÉ
+       ======================================================== -->
+  <footer class="rodape" id="falar">
+    <div class="container">
+      <h2>Vamos conversar?</h2>
+      <p class="frase">Pedidos, dúvidas e recomendações: é só chamar. Respondo rapidinho.</p>
+
+      <!-- ⚠️ Este é o ÚNICO lugar do HTML com o número escrito.
+           Ele é a rede de segurança pra quem está sem JavaScript.
+           Mantenha igual ao STORE_CONFIG.whatsapp lá embaixo. -->
+      <a class="botao botao-cheio" id="zap-principal"
+         href="https://wa.me/5562900000000?text=Oi!%20Vim%20pelo%20site%20%3A)">Chamar no WhatsApp</a>
+
+      <div class="colunas">
+        <div>
+          <h3>Categorias</h3>
+          <ul id="rodape-categorias"></ul>
+        </div>
+        <div>
+          <h3>Contato</h3>
+          <ul>
+            <li><a href="#falar" data-zap="Oi! Vim pelo site :)">WhatsApp</a></li>
+            <li id="rodape-instagram"></li>
+          </ul>
+        </div>
+        <div>
+          <h3>A vitrine</h3>
+          <ul>
+            <li><a href="#catalogo">Todos os produtos</a></li>
+            <li><a href="#curadoria">Por que está aqui</a></li>
+            <li><a href="#sobre">Quem escolhe</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="creditos">
+        <span data-marca-nome>Vitrine</span> · Só entra aqui o que eu usaria de novo.
+        <span id="ano"></span> · Feito à mão com HTML, CSS e um tiquinho de JS 🌷
+      </p>
+    </div>
+  </footer>
+
+  <a class="zap" href="#falar" data-zap="Oi! Vim pelo site :)" aria-label="Conversar no WhatsApp">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-2.9.8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.6-6.1c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.3-.7.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.4 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.8 2.8 4.5 3.9 1.7.7 2.3.8 3.1.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2 0-.1-.2-.2-.5-.3Z"/></svg>
+    <span class="zap-texto">Conversar no WhatsApp</span>
+  </a>
+
+  <div class="aviso-copia" id="aviso-copia" role="status" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   PARTE 13 — O CÉREBRO DO CATÁLOGO
+   ============================================================ */
+
+/* ---------- TROQUE AQUI: a configuração da loja ----------
+   Estes três valores mandam no site inteiro. O nome aparece no
+   topo e no rodapé; o WhatsApp vira TODOS os links de conversa;
+   o Instagram, se ficar vazio, some do rodapé sozinho.          */
+const STORE_CONFIG = {
+  nome: "Vitrine",                 // TROQUE AQUI: o nome da marca
+  whatsapp: "5562900000000",       // TROCAR PELO WHATSAPP REAL (55 + DDD + número)
+  instagram: ""                    // TROQUE AQUI: só o @, sem o link. Vazio = não aparece
+};
+
+/* Como cada apelido de categoria e finalidade aparece na tela.
+   O apelido (sem acento, minúsculo) é o que vai no data-*; o
+   rótulo é o que a cliente lê. Categoria ou finalidade que não
+   estiver aqui aparece com a primeira letra maiúscula mesmo. */
+const ROTULOS = {
+  pele: "Pele", cabelo: "Cabelo", maquiagem: "Maquiagem",
+  perfumes: "Perfumes", corpo: "Corpo",
+
+  luminosidade: "Luminosidade", uniformizacao: "Uniformização",
+  limpeza: "Limpeza", hidratacao: "Hidratação", protecao: "Proteção",
+  perfumar: "Perfumar", floral: "Floral", reconstrucao: "Reconstrução",
+  brilho: "Brilho", labios: "Lábios", "longa-duracao": "Longa duração"
+};
+
+document.documentElement.classList.add('com-js');
+
+/* ---------- FERRAMENTAS ---------- */
+
+// Tira acento e põe em minúsculo, pra busca achar "sérum"
+// quando a pessoa digita "serum" (e vice-versa).
+const semAcento = (t) => (t || "")
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "");   // tira os acentinhos
+
+const rotular = (apelido) =>
+  ROTULOS[apelido] || apelido.charAt(0).toUpperCase() + apelido.slice(1).replace(/-/g, " ");
+
+const emReais = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+
+// Monta um link de WhatsApp a partir do STORE_CONFIG. É por aqui
+// que TODOS os botões de conversa nascem — o número existe num
+// lugar só.
+const linkZap = (mensagem) =>
+  "https://wa.me/" + STORE_CONFIG.whatsapp + "?text=" + encodeURIComponent(mensagem);
+
+/* ---------- LENDO OS PRODUTOS DA PRÓPRIA PÁGINA ----------
+   Em vez de ter a lista de produtos escrita duas vezes (uma no
+   HTML e outra aqui), o script LÊ os blocos que já estão na
+   página. Vantagem: sem JavaScript os produtos continuam
+   aparecendo, porque eles são HTML de verdade.                  */
+/* ---------- AS FOTOS DOS PRODUTOS ----------
+   Como funciona pra você: crie uma pasta chamada "fotos" ao lado
+   deste arquivo e jogue lá dentro a imagem de cada produto, com o
+   MESMO nome que está no id do produto. Exemplo:
+
+       fotos/serum-vitamina-c.jpg
+       fotos/batom-matte-longa-duracao.png
+
+   Só isso. A foto aparece sozinha, não precisa mexer no código.
+   Serve .jpg, .jpeg, .png e .webp.
+
+   E por que fazer assim, em vez de já deixar um <img> escrito no
+   HTML? Porque enquanto a foto não existe, um <img> apontando pra
+   um arquivo que não está lá mostra aquele ícone feio de imagem
+   quebrada. Aqui a gente TENTA carregar em segredo: se a imagem
+   existe, ela entra; se não existe, fica o recadinho "foto do
+   produto" e ninguém vê nada quebrado. */
+const EXTENSOES = ['jpg', 'jpeg', 'png', 'webp'];
+
+function procurarFoto(card, slug, nome) {
+  const vaga = card.querySelector('.sem-foto');
+  if (!vaga) return;
+
+  let tentativa = 0;
+  (function tentarProxima() {
+    if (tentativa >= EXTENSOES.length) return;   // nenhuma existe: fica o recadinho
+    const caminho = `fotos/${slug}.${EXTENSOES[tentativa++]}`;
+    const teste = new Image();
+    teste.onload = () => {
+      const foto = document.createElement('img');
+      foto.src = caminho;
+      foto.alt = nome;          // o alt descreve a foto pra quem não enxerga
+      foto.loading = 'lazy';    // só baixa quando chega perto da tela
+      vaga.replaceWith(foto);
+    };
+    teste.onerror = tentarProxima;
+    teste.src = caminho;
+  })();
+}
+
+const grade = document.getElementById('grade');
+
+const produtos = [...grade.querySelectorAll('.card')].map((el) => {
+  const finalidades = (el.dataset.finalidades || "").split(/\s+/).filter(Boolean);
+  const nome = el.querySelector('h3').textContent.trim();
+  const marca = el.dataset.marca || "";
+  const descricao = el.querySelector('.descricao')?.textContent.trim() || "";
+  const recomendacao = el.querySelector('.recomendacao')?.textContent.trim() || "";
+
+  // Preenche o que é derivado: marca, preço formatado e o link
+  // de WhatsApp com o nome do produto dentro da mensagem.
+  el.querySelector('.marca-produto').textContent = marca;
+  el.querySelector('.preco').textContent = emReais.format(parseFloat(el.dataset.preco));
+  // Repare que a frase NÃO usa "o" nem "a" antes do nome. É de
+  // propósito: "Vi o Máscara capilar" estaria errado, e "Vi a
+  // Sérum" também. Como o programa monta a frase sozinho pra
+  // qualquer produto novo, ela precisa funcionar nos dois
+  // gêneros — então a gente escreve de um jeito que não precisa
+  // escolher. Um probleminha de português resolvido no texto. ;)
+  el.querySelector('.botao').href =
+    linkZap(`Oi! Vi no site e queria saber mais sobre: ${nome} 🌷`);
+
+  // Tenta achar a foto de verdade deste produto (veja a função
+  // logo abaixo). Se achar, ela entra no lugar do recadinho.
+  procurarFoto(el, el.id, nome);
+
+  // O botãozinho de compartilhar, criado só quando tem JS
+  const compartilhar = document.createElement('button');
+  compartilhar.type = 'button';
+  compartilhar.className = 'compartilhar';
+  compartilhar.innerHTML =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.9 12a3.1 3.1 0 0 1 3.1-3.1h4V7h-4a5 5 0 0 0 0 10h4v-1.9h-4A3.1 3.1 0 0 1 3.9 12ZM8 13h8v-2H8v2Zm9-6h-4v1.9h4a3.1 3.1 0 0 1 0 6.2h-4V17h4a5 5 0 0 0 0-10Z"/></svg>Copiar link';
+  compartilhar.addEventListener('click', () => copiarLink(el.id, nome));
+  el.appendChild(compartilhar);
+
+  return {
+    el,
+    id: el.id,
+    nome,
+    categoria: el.dataset.categoria,
+    finalidades,
+    preco: parseFloat(el.dataset.preco),
+    destaque: el.dataset.destaque === "1",
+    novo: el.dataset.novo === "1",
+    // O "texto" é tudo que a busca vasculha, já sem acento
+    texto: semAcento([
+      nome, marca, rotular(el.dataset.categoria), el.dataset.categoria,
+      finalidades.map(rotular).join(" "), finalidades.join(" "),
+      descricao, recomendacao
+    ].join(" "))
+  };
+});
+
+/* ---------- O ESTADO ----------
+   Uma caixinha só com "o que a cliente escolheu". Qualquer
+   mudança mexe aqui e manda desenhar de novo.                   */
+const estado = { categoria: "todos", finalidade: "todos", busca: "", ordem: "destaques" };
+
+/* ---------- AS FITAS DE FILTRO ----------
+   Nascem dos produtos. Categoria sem produto não vira botão, e
+   finalidade que não existe naquela categoria também não.       */
+const fitaCategorias = document.getElementById('fita-categorias');
+const fitaFinalidades = document.getElementById('fita-finalidades');
+
+function criarChip(valor, rotulo, ativo, aoClicar) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'chip';
+  b.textContent = rotulo;
+  b.setAttribute('aria-pressed', ativo ? 'true' : 'false');
+  b.addEventListener('click', aoClicar);
+  return b;
+}
+
+function montarCategorias() {
+  const encontradas = [...new Set(produtos.map(p => p.categoria))].sort();
+  fitaCategorias.replaceChildren(
+    criarChip("todos", "Todos", estado.categoria === "todos", () => escolherCategoria("todos")),
+    ...encontradas.map(c =>
+      criarChip(c, rotular(c), estado.categoria === c, () => escolherCategoria(c)))
+  );
+}
+
+function montarFinalidades() {
+  // A finalidade é o SEGUNDO nível: ela só faz sentido depois de
+  // escolher uma categoria. Em "Todos" a fita ficaria com todas
+  // as finalidades da loja de uma vez — muito barulho e pouca
+  // ajuda. Então em "Todos" ela simplesmente não aparece.
+  const naCategoria = produtos.filter(p => p.categoria === estado.categoria);
+  const encontradas = estado.categoria === "todos"
+    ? []
+    : [...new Set(naCategoria.flatMap(p => p.finalidades))].sort();
+
+  // Com uma finalidade só não há o que escolher — a fita some
+  if (encontradas.length < 2) {
+    fitaFinalidades.replaceChildren();
+    fitaFinalidades.hidden = true;
+    estado.finalidade = "todos";
+    return;
+  }
+  fitaFinalidades.hidden = false;
+  fitaFinalidades.replaceChildren(
+    criarChip("todos", "Todas", estado.finalidade === "todos", () => escolherFinalidade("todos")),
+    ...encontradas.map(f =>
+      criarChip(f, rotular(f), estado.finalidade === f, () => escolherFinalidade(f)))
+  );
+}
+
+function escolherCategoria(c) {
+  estado.categoria = c;
+  estado.finalidade = "todos";   // trocou de prateleira, zera a finalidade
+  montarCategorias();
+  montarFinalidades();
+  desenhar();
+}
+
+function escolherFinalidade(f) {
+  estado.finalidade = f;
+  montarFinalidades();
+  desenhar();
+}
+
+/* ---------- ORDENAÇÃO ---------- */
+const ordenadores = {
+  destaques:   (a, b) => (b.destaque - a.destaque) || a.nome.localeCompare(b.nome, 'pt-BR'),
+  novidades:   (a, b) => (b.novo - a.novo) || a.nome.localeCompare(b.nome, 'pt-BR'),
+  "preco-menor": (a, b) => a.preco - b.preco,
+  "preco-maior": (a, b) => b.preco - a.preco,
+  nome:        (a, b) => a.nome.localeCompare(b.nome, 'pt-BR')
+};
+
+/* ---------- DESENHAR ----------
+   Filtra, ordena, mostra/esconde e atualiza a contagem. Como os
+   cards já existem na página, aqui a gente só reorganiza.       */
+const contagem = document.getElementById('contagem');
+const botaoLimpar = document.getElementById('limpar');
+const blocoVazio = document.getElementById('vazio');
+
+function desenhar() {
+  const termo = semAcento(estado.busca.trim());
+
+  const visiveis = produtos.filter(p =>
+    (estado.categoria === "todos" || p.categoria === estado.categoria) &&
+    (estado.finalidade === "todos" || p.finalidades.includes(estado.finalidade)) &&
+    (termo === "" || p.texto.includes(termo))
+  ).sort(ordenadores[estado.ordem] || ordenadores.destaques);
+
+  produtos.forEach(p => { p.el.hidden = true; });
+  visiveis.forEach(p => { p.el.hidden = false; grade.appendChild(p.el); });
+
+  // A frase da contagem, montada por pedacinhos
+  const partes = [];
+  if (estado.categoria !== "todos") partes.push(rotular(estado.categoria));
+  if (estado.finalidade !== "todos") partes.push(rotular(estado.finalidade));
+  if (termo) partes.push(`“${estado.busca.trim()}”`);
+
+  const n = visiveis.length;
+  contagem.textContent =
+    (n === 1 ? "1 produto" : `${n} produtos`) +
+    (partes.length ? ` para ${partes.join(" · ")}` : "");
+
+  const temFiltro = estado.categoria !== "todos" || estado.finalidade !== "todos" || termo !== "";
+  botaoLimpar.hidden = !temFiltro;
+
+  grade.hidden = n === 0;
+  blocoVazio.hidden = n !== 0;
+}
+
+function limparTudo() {
+  estado.categoria = "todos";
+  estado.finalidade = "todos";
+  estado.busca = "";
+  document.getElementById('busca').value = "";
+  montarCategorias();
+  montarFinalidades();
+  desenhar();
+}
+
+botaoLimpar.addEventListener('click', limparTudo);
+document.getElementById('limpar-vazio').addEventListener('click', limparTudo);
+
+document.getElementById('busca').addEventListener('input', (e) => {
+  estado.busca = e.target.value;
+  desenhar();
+});
+document.getElementById('ordem').addEventListener('change', (e) => {
+  estado.ordem = e.target.value;
+  desenhar();
+});
+
+/* ---------- LINK COMPARTILHÁVEL DE CADA PRODUTO ----------
+   Muita gente vai mandar o produto pelo WhatsApp. Então cada um
+   tem um endereço próprio: ?produto=serum-vitamina-c            */
+const aviso = document.getElementById('aviso-copia');
+let sumirAviso;
+
+function mostrarAviso(texto) {
+  aviso.textContent = texto;
+  aviso.classList.add('aparecendo');
+  clearTimeout(sumirAviso);
+  sumirAviso = setTimeout(() => aviso.classList.remove('aparecendo'), 2600);
+}
+
+function urlDoProduto(id) {
+  const u = new URL(window.location.href);
+  u.hash = "";
+  u.searchParams.set('produto', id);
+  return u.toString();
+}
+
+async function copiarLink(id, nome) {
+  const url = urlDoProduto(id);
+  history.replaceState({ produto: id }, "", url);
+  try {
+    await navigator.clipboard.writeText(url);
+    mostrarAviso("Link copiado 🌷");
+  } catch {
+    // Alguns navegadores não deixam copiar direto; então a gente
+    // pelo menos deixa o endereço na barra pra pessoa copiar.
+    mostrarAviso("O link está na barra de endereço");
+  }
+}
+
+function abrirProduto(id, rolar) {
+  const alvo = produtos.find(p => p.id === id);
+  if (!alvo) return false;
+  // Limpa os filtros pra garantir que o produto apareça mesmo
+  limparTudo();
+  alvo.el.classList.add('destacado');
+  setTimeout(() => alvo.el.classList.remove('destacado'), 4000);
+  if (rolar) {
+    const suave = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    alvo.el.scrollIntoView({ behavior: suave ? 'smooth' : 'auto', block: 'center' });
+  }
+  return true;
+}
+
+function lerURL(rolar) {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('produto') || (location.hash ? location.hash.slice(1) : "");
+  if (id) abrirProduto(id, rolar);
+}
+
+// O botão Voltar navega DENTRO do site em vez de expulsar
+window.addEventListener('popstate', () => lerURL(true));
+
+/* ---------- O QUE VEM DO STORE_CONFIG ---------- */
+
+// O nome da marca, no topo e no rodapé
+document.querySelectorAll('[data-marca-nome]').forEach(el => {
+  el.textContent = STORE_CONFIG.nome;   // o pontinho rosa vem do CSS
+});
+
+// Todo link com data-zap vira um link de WhatsApp de verdade
+document.querySelectorAll('[data-zap]').forEach(el => {
+  el.href = linkZap(el.dataset.zap);
+});
+document.getElementById('zap-principal').href = linkZap("Oi! Vim pelo site :)");
+
+// As categorias do rodapé nascem dos produtos também
+document.getElementById('rodape-categorias').replaceChildren(
+  ...[...new Set(produtos.map(p => p.categoria))].sort().map(c => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = "#catalogo";
+    a.textContent = rotular(c);
+    a.addEventListener('click', () => { escolherCategoria(c); });
+    li.appendChild(a);
+    return li;
+  })
+);
+
+// Instagram: só aparece se estiver configurado
+if (STORE_CONFIG.instagram) {
+  const li = document.getElementById('rodape-instagram');
+  const a = document.createElement('a');
+  a.href = "https://instagram.com/" + STORE_CONFIG.instagram.replace('@', '');
+  a.textContent = "Instagram";
+  a.rel = "noopener";
+  li.appendChild(a);
+}
+
+document.getElementById('ano').textContent = new Date().getFullYear();
+
+/* ---------- LIGANDO TUDO ---------- */
+montarCategorias();
+montarFinalidades();
+desenhar();
+lerURL(true);
+</script>
+
+</body>
+</html>
