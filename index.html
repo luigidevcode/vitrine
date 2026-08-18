@@ -701,6 +701,45 @@
       object-fit: contain;         /* nunca deforma a embalagem */
       padding: 16% 14% 10%;
     }
+
+    /* QUANDO A FOTO É DE CATÁLOGO (fundo branco ou cinza claro).
+       Foto de e-commerce quase sempre vem com um fundo sólido já
+       embutido. Centralizada dentro do arco rosa, ela aparecia
+       como um retângulo branco no meio do rosa — a emenda entre a
+       foto e o arco ficava visível, com cara de recorte mal feito.
+
+       A saída é a foto PREENCHER o arco inteiro, de ponta a ponta
+       (object-fit: cover, sem padding). Aí não sobra arco pra
+       fazer emenda com coisa nenhuma: o fundo que a cliente vê é
+       o fundo da própria foto, e o arco continua sendo o arco,
+       porque a forma vem do border-radius e não da cor.
+
+       O cover corta um pedaço pra encaixar a foto quadrada num
+       arco mais alto que largo — uns 12% de cada lado. Em foto de
+       produto, que sempre vem com margem sobrando em volta do
+       pote, isso não encosta no produto.
+
+       A classe "com-foto" é o JavaScript que põe, no momento em
+       que a foto de verdade entra. Produto sem foto continua com
+       o arco rosa e o recadinho, do jeito que sempre foi. */
+    /* O ".card" na frente não é enfeite: sem ele, esta regra tem
+       força 2 e a regra da cor por categoria (.card[data-categoria]
+       .moldura) tem força 3 — o rosa da categoria ganharia e o
+       fundo branco nunca apareceria. Com a foto em "cover" isso
+       fica invisível, porque a imagem cobre o arco todo; mas se um
+       dia entrar uma foto mais estreita, a emenda voltaria. É a
+       mesma briga de especificidade que já apareceu neste arquivo
+       uma vez, e ela sempre aparece de novo. */
+    /* O aro rosa por dentro existe por causa das fotos de fundo
+       BRANCO: nelas o arco sumia dentro do branco do card, e a
+       forma de arco é a assinatura da casa. O inset desenha a
+       linha por dentro, acompanhando a curva, sem empurrar nada
+       de lugar (borda de verdade mudaria o tamanho da caixa). */
+    .card .moldura.com-foto{
+      background: var(--branco);
+      box-shadow: inset 0 0 0 1px var(--blush);
+    }
+    .card .moldura.com-foto img{ object-fit: cover; padding: 0; }
     /* Enquanto não existe foto de verdade, um recadinho discreto.
 
        O .88 tem uma história: este recadinho é escrito por cima
@@ -768,6 +807,10 @@
       font-size: 19px; font-weight: 600; color: var(--cacau);
       margin: 0 0 14px; margin-top: auto; padding-top: 14px;
     }
+    /* "Preço sob consulta" não é preço: é uma frase. Se ficasse
+       com o mesmo corpo e peso de um número, ia gritar mais alto
+       que os preços de verdade dos outros cards. */
+    .card .preco-consultar{ font-size: 15px; font-weight: 500; opacity: .8; }
     .card .botao{ padding: 11px 24px; font-size: 15px; align-self: center; }
 
     /* O link de compartilhar, discretinho no pé do card */
@@ -1230,13 +1273,26 @@
              └────────────────────────────────────────────────┘ -->
         <!-- Os filtros de reserva: só aparecem quando o JavaScript
              não roda. Veja "PARTE 5b" lá no CSS. -->
+        <!-- ⚠️ ESTA LISTA É ESCRITA NA MÃO — é a única do site.
+
+             As bolinhas de filtro lá de cima nascem sozinhas dos
+             produtos, então categoria sem produto nunca vira
+             botão. Aqui não: como isto precisa funcionar SEM
+             JavaScript, os links são HTML puro e ficam parados.
+
+             Ou seja: quando você acrescentar o primeiro produto
+             de cabelo, corpo, maquiagem ou perfume, ACRESCENTE O
+             LINK AQUI TAMBÉM. A regra de CSS que faz cada um
+             funcionar já existe (procure por "cat-cabelo" lá em
+             cima) — falta só o link.
+
+             E se ficar um link de categoria que não tem produto,
+             o estrago é este: quem estiver sem JavaScript clica e
+             a página fica vazia, sem explicação nenhuma. Por isso
+             hoje só estão aqui as categorias que existem. -->
         <nav class="filtros-sem-js" aria-label="Filtrar por categoria">
           <a href="#cat-todos">Todos</a>
-          <a href="#cat-cabelo">Cabelo</a>
-          <a href="#cat-corpo">Corpo</a>
-          <a href="#cat-maquiagem">Maquiagem</a>
           <a href="#cat-pele">Pele</a>
-          <a href="#cat-perfumes">Perfumes</a>
         </nav>
         <span class="alvo" id="cat-todos"></span>
         <span class="alvo" id="cat-cabelo"></span>
@@ -1246,125 +1302,83 @@
         <span class="alvo" id="cat-perfumes"></span>
 
         <div class="grade" id="grade">
-
-          <article class="card" id="serum-vitamina-c"
+          <!-- ┌──────────────────────────────────────────────┐
+               │  1. ZERO PORE PAD                            │
+               │  Dados conferidos no rótulo do produto:      │
+               │  155 g / 70 pads, AHA · BHA · Pantenol       │
+               └──────────────────────────────────────────────┘ -->
+          <article class="card" id="medicube-zero-pore-pad"
                    data-categoria="pele"
-                   data-finalidades="luminosidade uniformizacao"
-                   data-marca=""
-                   data-preco="79.90"
-                   data-destaque="1"
+                   data-finalidades="esfoliacao poros oleosidade"
+                   data-marca="Medicube"
+                   data-preco=""
+                   data-destaque="0"
                    data-novo="0">
             <div class="moldura">
-              <!-- A foto entra sozinha: basta existir o arquivo
-                   fotos/serum-vitamina-c.jpg (o mesmo nome do id
-                   deste produto). Veja "AS FOTOS" no JavaScript. -->
               <span class="sem-foto">foto do produto</span>
-              <span class="selo">queridinho</span>
             </div>
             <p class="categoria-produto">Pele</p>
-            <h3>Sérum facial vitamina C</h3>
+            <h3>Zero Pore Pad</h3>
             <p class="marca-produto"></p>
-            <p class="descricao">Pele iluminada e uniforme no dia a dia.</p>
-            <!-- TROQUE AQUI: a recomendação da Yasmin, em primeira pessoa.
+            <!-- TROQUE AQUI: dá pra deixar mais na sua voz. O que
+                 está aqui são só os fatos do rótulo. -->
+            <p class="descricao">Tônico em discos com AHA, BHA e pantenol. 70 unidades (155 g).</p>
+            <!-- TROQUE AQUI: a sua recomendação, em primeira pessoa.
                  Enquanto estiver vazia, o bloco some sozinho. -->
             <p class="recomendacao"></p>
-            <p class="preco">R$ 79,90</p>
+            <p class="preco"></p>
             <a class="botao botao-cheio" href="#falar">Quero esse</a>
           </article>
 
-          <article class="card" id="kit-skincare-essencial"
+          <!-- ┌──────────────────────────────────────────────┐
+               │  2. SÉRUM PDRN PINK PEPTIDE                  │
+               │  30 ml, confirmado no rótulo e na loja       │
+               └──────────────────────────────────────────────┘ -->
+          <article class="card" id="medicube-pdrn-pink-peptide-serum"
                    data-categoria="pele"
-                   data-finalidades="limpeza hidratacao protecao"
-                   data-marca=""
-                   data-preco="129.90"
-                   data-destaque="1"
+                   data-finalidades="luminosidade firmeza uniformizacao"
+                   data-marca="Medicube"
+                   data-preco=""
+                   data-destaque="0"
                    data-novo="0">
             <div class="moldura">
               <span class="sem-foto">foto do produto</span>
-              <span class="selo">queridinho</span>
             </div>
             <p class="categoria-produto">Pele</p>
-            <h3>Kit skincare essencial</h3>
+            <h3>Sérum PDRN Pink Peptide</h3>
             <p class="marca-produto"></p>
-            <p class="descricao">Limpeza, hidratação e proteção em três passos.</p>
+            <!-- TROQUE AQUI -->
+            <p class="descricao">Sérum com PDRN e complexo de 5 peptídeos. 30 ml.</p>
+            <!-- TROQUE AQUI: a sua recomendação -->
             <p class="recomendacao"></p>
-            <p class="preco">R$ 129,90</p>
+            <p class="preco"></p>
             <a class="botao botao-cheio" href="#falar">Quero esse</a>
           </article>
 
-          <article class="card" id="hidratante-corporal-karite"
-                   data-categoria="corpo"
-                   data-finalidades="hidratacao perfumar"
-                   data-marca=""
-                   data-preco="49.90"
+          <!-- ┌──────────────────────────────────────────────┐
+               │  3. CREME PDRN COLÁGENO ROSA                 │
+               │  ATENÇÃO: o volume NÃO estava na página que  │
+               │  eu li, então não está escrito aqui. Quando  │
+               │  você souber, acrescente na descrição.       │
+               └──────────────────────────────────────────────┘ -->
+          <article class="card" id="medicube-pdrn-creme-colageno-rosa"
+                   data-categoria="pele"
+                   data-finalidades="luminosidade hidratacao uniformizacao"
+                   data-marca="Medicube"
+                   data-preco=""
                    data-destaque="0"
                    data-novo="0">
             <div class="moldura">
               <span class="sem-foto">foto do produto</span>
             </div>
-            <p class="categoria-produto">Corpo</p>
-            <h3>Hidratante corporal karité</h3>
+            <p class="categoria-produto">Pele</p>
+            <h3>Creme PDRN Colágeno Rosa</h3>
             <p class="marca-produto"></p>
-            <p class="descricao">Toque macio e perfume suave o dia inteiro.</p>
+            <!-- TROQUE AQUI -->
+            <p class="descricao">Creme facial em cápsulas de colágeno rosa, com PDRN.</p>
+            <!-- TROQUE AQUI: a sua recomendação -->
             <p class="recomendacao"></p>
-            <p class="preco">R$ 49,90</p>
-            <a class="botao botao-cheio" href="#falar">Quero esse</a>
-          </article>
-
-          <article class="card" id="perfume-floral-75ml"
-                   data-categoria="perfumes"
-                   data-finalidades="floral"
-                   data-marca=""
-                   data-preco="99.90"
-                   data-destaque="0"
-                   data-novo="1">
-            <div class="moldura">
-              <span class="sem-foto">foto do produto</span>
-            </div>
-            <p class="categoria-produto">Perfumes</p>
-            <h3>Perfume floral 75ml</h3>
-            <p class="marca-produto"></p>
-            <p class="descricao">Fragrância delicada pra marcar presença.</p>
-            <p class="recomendacao"></p>
-            <p class="preco">R$ 99,90</p>
-            <a class="botao botao-cheio" href="#falar">Quero esse</a>
-          </article>
-
-          <article class="card" id="mascara-capilar-reconstrutora"
-                   data-categoria="cabelo"
-                   data-finalidades="reconstrucao brilho"
-                   data-marca=""
-                   data-preco="39.90"
-                   data-destaque="0"
-                   data-novo="1">
-            <div class="moldura">
-              <span class="sem-foto">foto do produto</span>
-            </div>
-            <p class="categoria-produto">Cabelo</p>
-            <h3>Máscara capilar reconstrutora</h3>
-            <p class="marca-produto"></p>
-            <p class="descricao">Brilho e força dos fios em uma aplicação.</p>
-            <p class="recomendacao"></p>
-            <p class="preco">R$ 39,90</p>
-            <a class="botao botao-cheio" href="#falar">Quero esse</a>
-          </article>
-
-          <article class="card" id="batom-matte-longa-duracao"
-                   data-categoria="maquiagem"
-                   data-finalidades="labios longa-duracao"
-                   data-marca=""
-                   data-preco="34.90"
-                   data-destaque="0"
-                   data-novo="0">
-            <div class="moldura">
-              <span class="sem-foto">foto do produto</span>
-            </div>
-            <p class="categoria-produto">Maquiagem</p>
-            <h3>Batom matte longa duração</h3>
-            <p class="marca-produto"></p>
-            <p class="descricao">Cor intensa que fica no lugar até o fim do dia.</p>
-            <p class="recomendacao"></p>
-            <p class="preco">R$ 34,90</p>
+            <p class="preco"></p>
             <a class="botao botao-cheio" href="#falar">Quero esse</a>
           </article>
 
@@ -1540,7 +1554,9 @@ const ROTULOS = {
   luminosidade: "Luminosidade", uniformizacao: "Uniformização",
   limpeza: "Limpeza", hidratacao: "Hidratação", protecao: "Proteção",
   perfumar: "Perfumar", floral: "Floral", reconstrucao: "Reconstrução",
-  brilho: "Brilho", labios: "Lábios", "longa-duracao": "Longa duração"
+  brilho: "Brilho", labios: "Lábios", "longa-duracao": "Longa duração",
+  esfoliacao: "Esfoliação", poros: "Poros", oleosidade: "Oleosidade",
+  firmeza: "Firmeza"
 };
 
 document.documentElement.classList.add('com-js');
@@ -1604,6 +1620,9 @@ function procurarFoto(card, slug, nome) {
       foto.alt = nome;          // o alt descreve a foto pra quem não enxerga
       foto.loading = 'lazy';    // só baixa quando chega perto da tela
       vaga.replaceWith(foto);
+      // Avisa o CSS que aqui agora tem foto de verdade: o arco
+      // deixa de ser rosa e passa a ser preenchido pela imagem.
+      card.querySelector('.moldura')?.classList.add('com-foto');
     };
     teste.onerror = tentarProxima;
     teste.src = caminho;
@@ -1622,7 +1641,19 @@ const produtos = [...grade.querySelectorAll('.card')].map((el) => {
   // Preenche o que é derivado: marca, preço formatado e o link
   // de WhatsApp com o nome do produto dentro da mensagem.
   el.querySelector('.marca-produto').textContent = marca;
-  el.querySelector('.preco').textContent = emReais.format(parseFloat(el.dataset.preco));
+
+  // PRODUTO SEM PREÇO AINDA.
+  // O data-preco pode estar vazio enquanto você não decidiu
+  // quanto vai cobrar. Sem este cuidado, o parseFloat de ""
+  // devolve NaN e a cliente via "R$ NaN" no card — que é a cara
+  // de site quebrado. Aqui ele mostra um recado honesto e o
+  // botão do WhatsApp continua funcionando: aliás, produto sem
+  // preço na tela é o que MAIS gera conversa.
+  const valor = parseFloat(el.dataset.preco);
+  const temPreco = Number.isFinite(valor) && valor > 0;
+  const campoPreco = el.querySelector('.preco');
+  campoPreco.textContent = temPreco ? emReais.format(valor) : "Preço sob consulta";
+  campoPreco.classList.toggle('preco-consultar', !temPreco);
   // Repare que a frase NÃO usa "o" nem "a" antes do nome. É de
   // propósito: "Vi o Máscara capilar" estaria errado, e "Vi a
   // Sérum" também. Como o programa monta a frase sozinho pra
@@ -1657,7 +1688,7 @@ const produtos = [...grade.querySelectorAll('.card')].map((el) => {
     nome,
     categoria: el.dataset.categoria,
     finalidades,
-    preco: parseFloat(el.dataset.preco),
+    preco: temPreco ? valor : null,   // null = ainda sem preço definido
     destaque: el.dataset.destaque === "1",
     novo: el.dataset.novo === "1",
     // O "texto" é tudo que a busca vasculha, já sem acento
@@ -1786,11 +1817,30 @@ function escolherFinalidade(f) {
 }
 
 /* ---------- ORDENAÇÃO ---------- */
+/* Quem ainda não tem preço vai pro FIM das duas ordenações por
+   dinheiro — tanto em "menor preço" quanto em "maior preço".
+
+   Repare que não dá pra resolver isso com um truque só. A
+   tentação é tratar "sem preço" como zero ou como infinito, mas
+   qualquer um dos dois acerta uma ordenação e erra a outra: o
+   zero joga o produto pro topo de "menor preço", o infinito joga
+   pro topo de "maior preço". Nos dois casos o produto sem preço
+   ocupa o lugar de destaque, que é justamente onde ele não
+   deveria estar. Por isso a regra é explícita: sem preço, vai
+   pro fim, seja qual for a direção. E entre dois sem preço,
+   ordem alfabética, pra lista não ficar dançando à toa.        */
+function porPreco(a, b, crescente) {
+  if (a.preco === null && b.preco === null) return a.nome.localeCompare(b.nome, 'pt-BR');
+  if (a.preco === null) return 1;    // a vai depois
+  if (b.preco === null) return -1;   // b vai depois
+  return crescente ? a.preco - b.preco : b.preco - a.preco;
+}
+
 const ordenadores = {
   destaques:   (a, b) => (b.destaque - a.destaque) || a.nome.localeCompare(b.nome, 'pt-BR'),
   novidades:   (a, b) => (b.novo - a.novo) || a.nome.localeCompare(b.nome, 'pt-BR'),
-  "preco-menor": (a, b) => a.preco - b.preco,
-  "preco-maior": (a, b) => b.preco - a.preco,
+  "preco-menor": (a, b) => porPreco(a, b, true),
+  "preco-maior": (a, b) => porPreco(a, b, false),
   nome:        (a, b) => a.nome.localeCompare(b.nome, 'pt-BR')
 };
 
