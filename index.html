@@ -1411,9 +1411,22 @@
 
       <!-- ⚠️ Este é o ÚNICO lugar do HTML com o número escrito.
            Ele é a rede de segurança pra quem está sem JavaScript.
-           Mantenha igual ao STORE_CONFIG.whatsapp lá embaixo. -->
+           Mantenha igual ao STORE_CONFIG.whatsapp lá embaixo.
+
+           SOBRE O aria-label: o botão diz "Enviar mensagem", que é
+           curto e fica bonito. Só que quem usa leitor de tela às
+           vezes pede a LISTA de botões da página, fora do contexto
+           — e aí "Enviar mensagem" sozinho não diz mensagem pra
+           onde. O aria-label é o nome que essa lista vai ler.
+
+           Repare que ele COMEÇA com o texto que está escrito no
+           botão. Isso não é estilo, é regra: quem usa comando de
+           voz fala "clicar em Enviar mensagem", lendo o que vê na
+           tela. Se o rótulo escondido fosse uma frase diferente,
+           o comando não acharia o botão. -->
       <a class="botao botao-cheio" id="zap-principal"
-         href="https://wa.me/5562991427633?text=Oi%21%20Vim%20pelo%20site%20%3A%29%0Ahttps%3A//luigidevcode.github.io/vitrine/">Chamar no WhatsApp</a>
+         aria-label="Enviar mensagem no WhatsApp"
+         href="https://wa.me/5562991427633?text=Oi%21%20Vim%20pelo%20site%20%3A%29%0Ahttps%3A//luigidevcode.github.io/vitrine/">Enviar mensagem</a>
 
       <div class="colunas">
         <div>
