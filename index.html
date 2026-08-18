@@ -109,6 +109,19 @@
          — quem enxerga pouco não lê. Este tom mais fundo continua
          sendo obviamente o WhatsApp e dá 5.41, que passa. */
       --zap:       #0B7A44;
+
+      /* AS ALTURAS DAS BARRAS QUE FICAM GRUDADAS NO TOPO.
+         Viraram variável porque DUAS coisas dependem delas e
+         precisam concordar entre si:
+           • a fita de filtros, que gruda logo abaixo do cabeçalho
+           • os "pulinhos" de âncora (o scroll-margin-top logo ali
+             embaixo), pra um link tipo "Ver todos os produtos" não
+             parar com o título escondido atrás da barra
+         Quando o celular muda essas alturas, ele muda só aqui e o
+         resto se ajusta sozinho. É o tipo de coisa que, escrita na
+         mão em três lugares, um dia sai de sincronia. */
+      --barra-topo: 70px;   /* cabeçalho grudado */
+      --barra-fita: 66px;   /* a fita de categorias, abaixo dele */
     }
 
     /* ⚠️ AVISO SOBRE O ROSA (regra importante deste arquivo)
@@ -139,6 +152,28 @@
     .container{ max-width: 1180px; margin: 0 auto; padding: 0 24px; }
 
     img{ max-width: 100%; display: block; }
+
+    /* O PULINHO DE ÂNCORA E A BARRA GRUDADA.
+       Quando alguém clica em "Ver todos os produtos", o navegador
+       rola até o #catalogo e para com ele coladinho no alto da
+       tela — só que ali em cima tem uma barra grudada por cima,
+       e o título fica escondido atrás dela. Parece que o clique
+       não funcionou.
+
+       O scroll-margin-top resolve isso com uma linha: ele diz ao
+       navegador "considere que esta seção começa tantos pixels
+       ANTES do que ela começa de verdade". Aí a rolagem para um
+       pouquinho acima e o título aparece inteiro.
+
+       As seções de baixo só têm o cabeçalho por cima; o catálogo
+       tem o cabeçalho E a fita de filtros — por isso a conta
+       soma as duas. */
+    #curadoria, #sobre, #falar{
+      scroll-margin-top: calc(var(--barra-topo) + 16px);
+    }
+    #catalogo{
+      scroll-margin-top: calc(var(--barra-topo) + var(--barra-fita) + 16px);
+    }
 
     /* O atributo "hidden" precisa vencer o display:flex dos cards */
     [hidden]{ display: none !important; }
@@ -248,17 +283,30 @@
     .zap-topo svg{ width: 16px; height: 16px; fill: currentColor; }
     .topo nav a.zap-topo:hover{ background: var(--marrom-hover); color: var(--branco); }
 
-    /* CELULAR: o menu vira dois links curtinhos e o botão some
-       (o botão flutuante lá embaixo já resolve o contato) */
     /* CELULAR: o cabeçalho vira UMA linha só — logo à esquerda,
-       botão do WhatsApp à direita. Antes ele ocupava 99px em duas
-       linhas; agora ocupa 56px. Como a barra fica grudada no topo
-       o tempo todo, cada pixel dela é um pixel a menos de vitrine.
+       botão do WhatsApp à direita. Os links "A curadoria" e
+       "Sobre" saem daqui e continuam acessíveis no rodapé: num
+       celular a navegação de verdade é a vitrine, logo abaixo.
 
-       Os links "A curadoria" e "Sobre" saem daqui e continuam
-       acessíveis no rodapé. Num celular a navegação de verdade é
-       a vitrine, que começa logo abaixo. */
+       E A MUDANÇA MAIS IMPORTANTE: no celular o cabeçalho DEIXA
+       de ficar grudado e rola junto com a página.
+
+       Por quê? Antes ficavam duas barras coladas no alto o tempo
+       todo — o cabeçalho (56px) e a fita de categorias (65px).
+       Juntas comiam 121px, quase um sexto da tela, em TODA
+       rolagem. E o nome da loja, que a pessoa já leu quando
+       chegou, não ajuda em nada a escolher um produto.
+
+       Então no celular fica grudada só a barra que trabalha: a
+       fita de categorias. O nome e a logo continuam lá em cima,
+       na chegada, e o contato continua sempre à mão no botão
+       flutuante do WhatsApp. Num monitor grande sobra espaço de
+       sobra, então lá o cabeçalho continua grudado como estava. */
     @media (max-width: 760px){
+      /* zero porque no celular NADA fica grudado acima da fita —
+         a fita mesma gruda no topo da tela (top: 0) */
+      :root{ --barra-topo: 0px; --barra-fita: 56px; }
+      .topo{ position: static; }
       .topo .container{
         height: 56px; padding: 0 16px;
         flex-wrap: nowrap; justify-content: space-between; gap: 10px;
@@ -359,7 +407,7 @@
        leitor de tela.
        ========================================================== */
     .filtros{
-      position: sticky; top: 70px;
+      position: sticky; top: var(--barra-topo);
       background: var(--porcelana);
       border-bottom: 1px solid var(--blush);
       z-index: 20; padding: 16px 0 14px;
@@ -372,6 +420,31 @@
     }
     .fita::-webkit-scrollbar{ height: 5px; }
     .fita::-webkit-scrollbar-thumb{ background: var(--blush); border-radius: 99px; }
+
+    /* "TEM MAIS COISA PRA CÁ" — a beiradinha que desbota.
+       No celular a fita não cabe inteira, e o problema de uma
+       coisa que rola pro lado é que ela não AVISA que rola. A
+       categoria cortada no canto direito até dá uma pista, mas
+       parece igualzinho a um chip que simplesmente terminou ali.
+
+       A máscara resolve visualmente: o último pedacinho da fita
+       vai perdendo opacidade, e nada que desbota parece ter
+       acabado — parece continuar. É a mesma dica que o dedo já
+       conhece dos aplicativos.
+
+       O "mask-image" é uma máscara de recorte: onde ela é preta o
+       conteúdo aparece; onde ela é transparente, some. Aqui o
+       preto vai até 34px antes do fim e some no finzinho.
+
+       E repare que a classe .tem-mais é o JavaScript que põe e
+       tira, só quando a fita REALMENTE não cabe (e some quando a
+       pessoa chega no fim da rolagem). Se ficasse ligada sempre,
+       um dia com três categorias curtinhas o site estaria
+       desbotando um canto sem ter nada escondido lá. */
+    .fita.tem-mais{
+      -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent);
+              mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent);
+    }
 
     .chip{
       flex: 0 0 auto; scroll-snap-align: start;
@@ -402,14 +475,12 @@
       background: var(--marrom-marca); color: var(--branco); border-color: var(--marrom-marca);
     }
 
-    /* CELULAR: os filtros GRUDAM logo abaixo do cabeçalho.
-       Antes eles eram "static", ou seja, sumiam assim que a
-       pessoa rolava — e pra trocar de categoria ela tinha que
-       voltar mil pixels. Agora a fita acompanha a rolagem, do
-       jeito que as lojas grandes fazem. O 56px é exatamente a
-       altura do cabeçalho, pra um encostar no outro sem buraco. */
+    /* CELULAR: a fita gruda no TOPO DA TELA (o top: 0 vem da
+       variável --barra-topo, que no celular vale zero). Ela é a
+       única barra grudada, e é a que a pessoa usa de verdade:
+       trocar de categoria sem rolar mil pixels de volta. */
     @media (max-width: 760px){
-      .filtros{ position: sticky; top: 56px; padding: 12px 0 10px; }
+      .filtros{ padding: 10px 0 9px; }
       .fita{ padding-left: 16px; padding-right: 16px; }
       /* a fita rola de ponta a ponta da tela, sem a margem do
          container cortando ela pela metade */
@@ -681,9 +752,34 @@
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
         overflow: hidden;
       }
-      /* o "Copiar link" vira só o ícone: seis vezes a palavra
-         escrita poluía a vitrine no celular */
-      .compartilhar{ font-size: 0; padding: 8px 10px; gap: 0; }
+      /* O "Copiar link" sai do PÉ do card e vira um botãozinho
+         redondo no cantinho de cima.
+
+         No pé ele custava caro: uma faixa de uns 40px em cada
+         fileira, ocupada por um elo de corrente solto que não
+         explicava o que era. Com dois cards por linha e três
+         fileiras na tela, era mais de 100px de vitrine gastos com
+         seis iconezinhos mudos.
+
+         No canto de cima ele vira o que sempre foi: um detalhe de
+         canto, do jeito que a gente já espera num aplicativo. O
+         card fica com uma coluna limpa — foto, nome, preço, botão
+         — e a ordem no CÓDIGO continua a mesma, então quem usa
+         leitor de tela e quem anda de Tab continua ouvindo o
+         "Copiar link" no fim do card, que é onde ele faz sentido.
+
+         O position:relative no card é o que dá o "canto" pro
+         botão se pendurar. Sem ele, o absolute iria procurar o
+         canto da PÁGINA e o botão apareceria lá longe. */
+      .card{ position: relative; }
+      .compartilhar{
+        position: absolute; top: 6px; right: 6px; z-index: 2;
+        margin-top: 0; padding: 8px;
+        font-size: 0; gap: 0;
+        background: rgba(253, 248, 246, .82);
+        border-radius: 999px;
+        opacity: 1; color: var(--amora);
+      }
       .compartilhar svg{ width: 15px; height: 15px; }
     }
 
@@ -829,13 +925,46 @@
        outra e o rodapé chegava a 933px — quase uma tela e meia só
        de rodapé. Em duas colunas ele encolhe pela metade. */
     @media (max-width: 640px){
-      .rodape{ padding: 48px 0 96px; }
+      /* Os 84px lá embaixo não são capricho: é o espaço pro botão
+         flutuante do WhatsApp, que mora naquele canto. Sem essa
+         folga ele fica em cima do último link do rodapé e a
+         pessoa erra o toque. */
+      .rodape{ padding: 40px 0 84px; }
+      /* AS LISTAS DO RODAPÉ EM DUAS COLUNAS DE JORNAL.
+         A primeira tentativa foi uma grade de 2 colunas, e ela
+         tinha um defeito: "Categorias" tem 5 links e "Contato"
+         tem 1: sobrava um buraco enorme do lado direito, e "A
+         vitrine" era jogada pra uma terceira fileira.
+
+         O "columns: 2" é outra ideia: em vez de casinhas fixas,
+         ele trata o rodapé como texto de jornal e DERRAMA as
+         listas em duas colunas, equilibrando a altura sozinho.
+         Assim "Contato" e "A vitrine" se acomodam uma embaixo da
+         outra no espaço que sobrava.
+
+         O break-inside: avoid é a única regra a decorar aqui: ele
+         proíbe o navegador de cortar uma lista no meio e jogar
+         metade dos links pra outra coluna.
+
+         O bônus: se um dia você acrescentar uma quarta lista, o
+         rodapé se reequilibra sem precisar mexer no CSS. */
       .rodape .colunas{
-        display: grid; grid-template-columns: 1fr 1fr;
-        gap: 26px 18px;
+        display: block; columns: 2; column-gap: 18px;
+        padding-top: 24px; margin-top: 24px;
+      }
+      .rodape .colunas > div{
+        -webkit-column-break-inside: avoid;   /* iPhones mais antigos */
+                        break-inside: avoid;
+        margin-bottom: 20px;
       }
       .rodape h2{ font-size: 26px; }
-      .rodape .frase{ margin-bottom: 22px; }
+      .rodape .frase{ margin-bottom: 20px; }
+      .rodape h3{ margin-bottom: 6px; }
+      /* Aqui dá pra apertar sem perder o alvo de toque: o link
+         continua com uns 26px de altura, que o dedo acerta. Menos
+         que isso a gente NÃO desce, por mais rodapé que sobre. */
+      .rodape li a{ padding: 4px 0; }
+      .creditos{ margin-top: 24px; padding-top: 16px; font-size: 13px; }
     }
 
     /* ==========================================================
@@ -938,6 +1067,24 @@
         <a class="botao botao-vazado" href="#falar" data-zap="Oi! Vim pelo site e queria conversar sobre os produtos.">Falar comigo</a>
       </div>
     </section>
+
+    <!-- ======================================================
+         ÁREA DO CATÁLOGO = a fita de filtros + os produtos
+
+         Esta <div> não desenha NADA na tela. Ela existe por um
+         motivo só, e é um detalhe bonito de como o "grudar"
+         funciona: uma coisa grudada (position: sticky) só gruda
+         enquanto o PAI dela está passando na tela. Quando o pai
+         acaba, ela se solta e vai embora junto.
+
+         Antes o pai da fita era a página inteira — então a fita
+         de categorias continuava colada no alto durante o "Como
+         comprar", o "Sobre" e o rodapé, oferecendo filtro de
+         produto pra quem já tinha saído da vitrine há muito
+         tempo. Agora o pai dela é só a área do catálogo: acabaram
+         os produtos, a fita se despede sozinha.
+         ====================================================== -->
+    <div class="area-catalogo">
 
     <!-- ======================================================
          AS FITAS DE FILTRO
@@ -1158,6 +1305,8 @@
 
       </div>
     </section>
+
+    </div><!-- fim da área do catálogo: a fita para de grudar aqui -->
 
     <!-- ======================================================
          CURADORIA
@@ -1453,6 +1602,51 @@ function criarChip(valor, rotulo, ativo, aoClicar) {
   return b;
 }
 
+/* AS DUAS GENTILEZAS DA FITA QUE ROLA PRO LADO.
+
+   1) trazerAtivoPraTela: quando a pessoa escolhe "Perfumes", que
+      é o último botão, a fita se redesenha e o botão escolhido
+      pode ficar escondido lá fora. Aí ela não vê o que acabou de
+      escolher. Esta função empurra a fita até centralizar o
+      botão marcado.
+
+      Repare que a gente mexe no scrollLeft da fita NA MÃO, em vez
+      de usar o scrollIntoView pronto do navegador. Motivo: o
+      scrollIntoView também rola a PÁGINA pra alcançar o
+      elemento — e como a fita fica grudada no topo, a página
+      daria um pulo estranho a cada clique. Mexendo no scrollLeft
+      a gente move só a fitinha, que é o que queríamos.
+
+   2) marcarFitaQueRola: liga e desliga a beiradinha que desbota
+      (veja a classe .tem-mais lá no CSS), medindo quanto ainda
+      falta pra chegar no fim.                                   */
+function trazerAtivoPraTela(fita) {
+  const ativo = fita.querySelector('[aria-pressed="true"]');
+  if (!ativo) return;
+  const centralizado = ativo.offsetLeft - (fita.clientWidth - ativo.offsetWidth) / 2;
+  fita.scrollLeft = Math.max(0, centralizado);
+}
+
+function marcarFitaQueRola(fita) {
+  const faltaRolar = fita.scrollWidth - fita.clientWidth - fita.scrollLeft;
+  fita.classList.toggle('tem-mais', faltaRolar > 4);
+}
+
+function ajeitarFitas() {
+  [fitaCategorias, fitaFinalidades].forEach(f => {
+    trazerAtivoPraTela(f);
+    marcarFitaQueRola(f);
+  });
+}
+
+// Enquanto o dedo arrasta a fita, a beiradinha se atualiza. O
+// { passive: true } é uma promessa que a gente faz pro navegador:
+// "não vou atrapalhar a rolagem" — e ele rola mais liso por isso.
+[fitaCategorias, fitaFinalidades].forEach(f => {
+  f.addEventListener('scroll', () => marcarFitaQueRola(f), { passive: true });
+});
+window.addEventListener('resize', ajeitarFitas);
+
 function montarCategorias() {
   const encontradas = [...new Set(produtos.map(p => p.categoria))].sort();
   fitaCategorias.replaceChildren(
@@ -1460,6 +1654,7 @@ function montarCategorias() {
     ...encontradas.map(c =>
       criarChip(c, rotular(c), estado.categoria === c, () => escolherCategoria(c)))
   );
+  ajeitarFitas();
 }
 
 function montarFinalidades() {
@@ -1485,6 +1680,7 @@ function montarFinalidades() {
     ...encontradas.map(f =>
       criarChip(f, rotular(f), estado.finalidade === f, () => escolherFinalidade(f)))
   );
+  ajeitarFitas();
 }
 
 function escolherCategoria(c) {
