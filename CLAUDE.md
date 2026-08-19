@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## O que é este projeto
 
-Vitrine digital de uma revendedora de beleza (pt-BR, WhatsApp como checkout — sem carrinho, sem pagamento) que é TAMBÉM uma aula de HTML/CSS/JS para uma não-programadora. **O arquivo único, sem build e cheio de comentários didáticos É o entregável**: introduzir framework, build, minificação, arquivos separados ou código "enxuto demais" destrói o propósito do projeto, mesmo que o resultado pareça melhor.
+Vitrine digital de uma revendedora de beleza (pt-BR, WhatsApp como checkout — sem pagamento; a sacola existe mas só MONTA a mensagem do pedido, não é e-commerce) que é TAMBÉM uma aula de HTML/CSS/JS para uma não-programadora. **O arquivo único, sem build e cheio de comentários didáticos É o entregável**: introduzir framework, build, minificação, arquivos separados ou código "enxuto demais" destrói o propósito do projeto, mesmo que o resultado pareça melhor.
 
 - Site no ar: https://luigidevcode.github.io/vitrine/ (GitHub Pages, branch `main`, raiz — push em `main` = deploy, com cache de ~10 min).
 - Tudo mora em `index.html` (~3000 linhas), organizado em "PARTES" numeradas por cabeçalhos-comentário (PARTE 1 = cores … PARTE 13 = o JavaScript, "o cérebro do catálogo").
@@ -26,6 +26,7 @@ Vitrine digital de uma revendedora de beleza (pt-BR, WhatsApp como checkout — 
 - **Fotos**: `fotos/<id>.jpg` (+ `<id>-2.jpg`, `-3`… para a galeria). O JS tenta carregar em segredo (`procurarFoto`) — sem foto não aparece ícone quebrado — e a galeria para no primeiro número que faltar, então a numeração não pode ter buraco. Só as fotos principais carregam com a vitrine; a galeria é buscada no clique.
 - **"Página" de produto**: um único `<dialog>` reaproveitado, endereçável por `?produto=<id>` (o mesmo link do botão "Copiar link"); Voltar/Esc/X fecham sem sujar o histórico.
 - **Cartão OG do WhatsApp**: `preview.jpg` é gerado por `preview-fonte.html` (o comando Chrome headless + `sips` está no rodapé desse arquivo). Ele tem paleta própria hardcoded — não herda a do site; mudou a cara do hero, regenere.
+- **Sacola** (PARTE 11b no CSS, seção "A SACOLA" no JS): guarda só `{id, tamanho}` em localStorage (`vitrine-sacola`); nome, preço e foto são resolvidos na hora, lendo os cards. Todos os botões dela nascem no JS (sem JS, nada sobra na tela). São DOIS `<dialog>` compartilhando o CSS `.janela` e DOIS ouvintes de `popstate` — cada um cuida do próprio degrau ({janela: id} vs {sacola: true}), nunca dos dois. No card, produto com vários tamanhos NÃO adiciona direto: abre a página do produto pra cliente escolher o pote (nunca chutar tamanho). O toast não aparece por cima de `<dialog>` aberto (top layer) — dentro da janela, quem confirma é o próprio botão virando "Está na sacola ✓".
 
 ## Comandos e verificação
 

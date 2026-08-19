@@ -1047,11 +1047,13 @@
        outra e o rodapé chegava a 933px — quase uma tela e meia só
        de rodapé. Em duas colunas ele encolhe pela metade. */
     @media (max-width: 640px){
-      /* Os 84px lá embaixo não são capricho: é o espaço pro botão
-         flutuante do WhatsApp, que mora naquele canto. Sem essa
-         folga ele fica em cima do último link do rodapé e a
-         pessoa erra o toque. */
-      .rodape{ padding: 40px 0 84px; }
+      /* A folga lá embaixo não é capricho: é o espaço dos botões
+         flutuantes, que moram naquele canto. Eram 84px pro verde
+         do WhatsApp; quando a sacola veio morar EM CIMA dele, a
+         pilha passou a alcançar uns 132px — e a folga cresceu
+         junto, senão os créditos ficavam escondidos atrás dos
+         botões e a pessoa errava o toque. */
+      .rodape{ padding: 40px 0 140px; }
       /* AS LISTAS DO RODAPÉ EM DUAS COLUNAS DE JORNAL.
          A primeira tentativa foi uma grade de 2 colunas, e ela
          tinha um defeito: "Categorias" tem 5 links e "Contato"
@@ -1120,6 +1122,15 @@
     .janela{
       width: min(560px, 100%);
       max-height: min(86vh, 780px);
+      /* O margin: auto é o que CENTRALIZA a janela na tela — e é
+         do navegador, não nosso: todo <dialog> nasce com ele. Só
+         que o nosso reset lá na PARTE 2 (*{ margin: 0 }) apagava
+         esse presente, e a janela abria grudada no canto de cima
+         do monitor. No celular ninguém percebia, porque a versão
+         de folha (logo abaixo) escreve o margin dela por cima.
+         Foi a janela da sacola que entregou o defeito: ele sempre
+         esteve aqui, na do produto também. */
+      margin: auto;
       padding: 0; border: 0; border-radius: 22px;
       background: var(--porcelana); color: var(--tinta);
       box-shadow: 0 30px 70px rgba(70, 54, 61, .3);
@@ -1313,6 +1324,163 @@
       .zap svg{ width: 24px; height: 24px; }
     }
 
+    /* ==========================================================
+       PARTE 11b — A SACOLA
+
+       A sacola resolve UMA fricção: quem queria três produtos
+       mandava três mensagens, ou voltava três vezes no site. Com
+       ela, a cliente vai juntando os produtos e envia a lista
+       inteira numa mensagem só.
+
+       E repare no que ela NÃO é: não tem pagamento, não tem
+       cadastro, não tem estoque. O caixa deste site continua
+       sendo a conversa no WhatsApp — a sacola só ESCREVE a
+       mensagem pela cliente. É por isso que ela pôde ficar
+       simples assim.
+
+       Tudo dela nasce no JavaScript (os botões dos cards, o
+       flutuante, a janela): sem JS não sobra nenhum botão morto
+       na tela, e os "Quero esse" continuam funcionando como
+       sempre. O Plano A / Plano B da casa, de novo.
+       ========================================================== */
+
+    /* O botão "Adicionar à sacola" dos cards e da página do
+       produto. É o irmão VAZADO do "Quero esse": a mesma pílula,
+       sem preenchimento — porque ele é a segunda ação, não a
+       primeira. Dois botões cheios empilhados brigariam pela
+       atenção; um cheio e um vazado contam sozinhos qual é o
+       principal. (Ele não usa a classe .botao-vazado pronta
+       porque ela carrega um margin-left pro caso do hero, que
+       aqui só atrapalharia.) */
+    .botao-sacola{
+      color: var(--marrom-marca); background: transparent;
+      border: 1.5px solid var(--marrom-marca);
+    }
+    .botao-sacola:hover{ background: var(--marrom-marca); color: var(--branco); }
+    .botao-sacola:active{ background: var(--marrom-hover); color: var(--branco); }
+    .card .botao-sacola{ margin-top: 8px; }
+
+    /* Quando o produto JÁ está na sacola, o botão vira um aviso
+       parado: "Está na sacola ✓", fundo blush, sem clique. O
+       pointer-events desliga até o efeitinho de hover — botão que
+       reage ao mouse promete um clique que não existe. Cacau
+       sobre blush dá 8.64 de contraste: aviso apagadinho, mas
+       apagadinho LEGÍVEL. */
+    .botao-sacola:disabled{
+      background: var(--blush); border-color: var(--blush);
+      color: var(--cacau); pointer-events: none;
+    }
+
+    /* O BOTÃO FLUTUANTE DA SACOLA, empilhado em cima do verde.
+       Mesmo canto, mesma sombra, mesmo tamanho de alvo — a
+       cliente já aprendeu que aquele canto é "os botões que me
+       acompanham", e a sacola entra na pilha em vez de inventar
+       um canto novo.
+
+       O detalhe importante é que ele SÓ EXISTE quando tem coisa
+       dentro (o JavaScript tira o hidden na primeira adição).
+       Sacola vazia não é informação, é móvel atrapalhando a
+       vitrine — e quem nunca usar a sacola nunca vai saber que
+       ela existia ali.
+
+       Ele é marrom, não verde: verde é a cor de UMA coisa neste
+       site (falar no WhatsApp), e a sacola é ação da loja, que é
+       o trabalho do marrom da marca. Ícone branco em cima: 7.94. */
+    .sacola-flutuante{
+      position: fixed; right: 20px; bottom: 78px;
+      width: 54px; height: 54px;
+      border: 0; border-radius: 999px;
+      background: var(--marrom-marca); color: var(--branco);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, .22);
+      transition: transform .15s ease;
+      z-index: 40;
+    }
+    .sacola-flutuante:hover{ transform: scale(1.05); background: var(--marrom-hover); }
+    .sacola-flutuante svg{ width: 24px; height: 24px; fill: currentColor; }
+    /* Flutuante em cima de fundo imprevisível: moldura de foco por
+       DENTRO, igualzinho ao .zap lá em cima — e pelo mesmo motivo. */
+    .sacola-flutuante:focus-visible{
+      outline-color: var(--porcelana);
+      outline-offset: -5px;
+    }
+
+    /* A bolinha da contagem. Branca com número cacau (10.70) —
+       ela precisa saltar tanto do botão marrom quanto do fundo
+       porcelana da página, e o branco é a única cor da paleta que
+       contrasta com os dois ao mesmo tempo. A sombrinha desenha a
+       beirada quando o fundo atrás também é claro. */
+    .sacola-contagem{
+      position: absolute; top: -4px; right: -4px;
+      min-width: 22px; height: 22px; padding: 0 6px;
+      border-radius: 999px;
+      background: var(--branco); color: var(--cacau);
+      font-size: 12.5px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 1px 5px rgba(70, 54, 61, .3);
+    }
+
+    /* A JANELA DA SACOLA reaproveita a .janela inteira (fundo,
+       cantos, folha que sobe no celular). Aqui só o que é dela. */
+    .janela-sacola .janela-conteudo{ padding-top: 24px; }
+    .janela-sacola h2{ font-size: 26px; margin-bottom: 4px; }
+    .sacola-explica{ font-size: 14.5px; opacity: .8; margin-bottom: 10px; }  /* 5.92 */
+
+    .sacola-lista{ list-style: none; }
+    .sacola-item{
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 0; text-align: left;
+      border-bottom: 1px solid var(--blush);
+    }
+    /* A miniatura pega emprestada a foto que o card já baixou.
+       Produto ainda sem foto fica com o quadradinho blush — que é
+       o mesmo combinado do card, ninguém vê nada quebrado. */
+    .sacola-item .thumb{
+      flex: 0 0 auto; width: 54px; height: 54px;
+      border-radius: 12px; background: var(--blush); overflow: hidden;
+    }
+    .sacola-item .thumb img{ width: 100%; height: 100%; object-fit: cover; }
+    .sacola-item .info{ flex: 1; min-width: 0; }
+    .sacola-item .nome{
+      font-weight: 600; color: var(--cacau);
+      font-size: 15.5px; line-height: 1.35;
+    }
+    .sacola-item .pormenor{ font-size: 13.5px; opacity: .75; }  /* 5.12 */
+    /* O X de tirar: padding generoso pela mesma conta do "Copiar
+       link" — só o desenho dava ~16px, e dedo não acerta 16px. */
+    .sacola-item .tirar{
+      flex: 0 0 auto; background: none; border: 0; cursor: pointer;
+      padding: 10px; color: var(--tinta); opacity: .7; display: flex;
+    }
+    .sacola-item .tirar:hover{ opacity: 1; color: var(--marrom-marca); }
+    .sacola-item .tirar svg{ width: 16px; height: 16px; fill: currentColor; }
+
+    .sacola-rodape{
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 14px 0 4px;
+    }
+    .sacola-total{ font-weight: 600; color: var(--cacau); font-size: 16px; margin-left: auto; }
+    .sacola-vazia{ text-align: center; padding: 26px 8px 10px; }
+    .sacola-vazia .botao{ margin-top: 18px; }
+    .sacola-continuar{ display: block; margin: 4px auto 0; }
+
+    @media (max-width: 640px){
+      /* A pilha do canto no celular: o zap vira bolinha de 54px
+         encostada a 16px da borda; a sacola senta em cima dele. */
+      .sacola-flutuante{ right: 16px; bottom: 82px; width: 50px; height: 50px; }
+      .sacola-flutuante svg{ width: 22px; height: 22px; }
+      /* Na janela do produto, os três botões não cabem numa linha
+         de celular. O da sacola desce pra uma linha inteira dele
+         (flex-basis 100%), e o "order: 3" manda ele pro FIM da
+         dobra — sem isso, o iconezinho de copiar link, que vem
+         depois dele no código, cairia sozinho numa terceira
+         linha. A ordem do teclado continua a do código; só o
+         desenho muda. */
+      .janela-acoes{ flex-wrap: wrap; }
+      .janela-acoes .botao-sacola{ flex: 1 1 100%; order: 3; }
+    }
+
     /* O avisinho de "link copiado" */
     .aviso-copia{
       position: fixed; left: 50%; bottom: 92px; transform: translateX(-50%);
@@ -1459,7 +1627,7 @@
              │  Cada <article> é UM produto. Pra adicionar,    │
              │  copie um bloco inteiro, cole embaixo e troque  │
              │  os textos. O resto (filtros, busca, contagem,  │
-             │  link do WhatsApp) se ajusta sozinho.           │
+             │  sacola e link do WhatsApp) se ajusta sozinho.  │
              │                                                 │
              │  O que cada atributo faz:                       │
              │   id              → o link compartilhável       │
@@ -1832,7 +2000,7 @@
           <div class="passo">
             <span class="numero" aria-hidden="true">2</span>
             <h3>Me chama</h3>
-            <p>Clique em “Quero esse” e a conversa já abre falando dele.</p>
+            <p>Clique em “Quero esse” e a conversa já abre falando dele. Vai levar mais de um? Toque em “Adicionar à sacola” e envie a lista inteira de uma vez.</p>
           </div>
           <div class="passo">
             <span class="numero" aria-hidden="true">3</span>
@@ -1933,6 +2101,19 @@
     <span class="zap-texto">Conversar no WhatsApp</span>
   </a>
 
+  <!-- O BOTÃO FLUTUANTE DA SACOLA.
+       Ele nasce escondido (hidden) e é o JavaScript que o acorda
+       na primeira adição — sacola vazia não vira botão. O número
+       de itens vai na bolinha, mas a bolinha é só desenho
+       (aria-hidden): quem usa leitor de tela recebe a contagem
+       pelo aria-label do botão, que o JavaScript mantém em dia
+       ("Abrir a sacola (2 itens)"). Assim ninguém ouve um "2"
+       solto sem saber dois de quê. -->
+  <button class="sacola-flutuante so-com-js" id="sacola-flutuante" type="button" hidden aria-label="Abrir a sacola">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2Zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2Zm6 16H6V8h2v2c0 .55.45 1 1 1s1-.45 1-1V8h4v2c0 .55.45 1 1 1s1-.45 1-1V8h2v12Z"/></svg>
+    <span class="sacola-contagem" id="sacola-contagem" aria-hidden="true"></span>
+  </button>
+
   <!-- ========================================================
        A PÁGINA DO PRODUTO
 
@@ -1956,6 +2137,23 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5 5 6.4l5.6 5.6L5 17.6 6.4 19l5.6-5.6 5.6 5.6 1.4-1.4-5.6-5.6L19 6.4 17.6 5 12 10.6 6.4 5Z"/></svg>
     </button>
     <div class="janela-conteudo" id="janela-conteudo"></div>
+  </dialog>
+
+  <!-- ========================================================
+       A JANELA DA SACOLA
+
+       Segunda <dialog> do site, pelos mesmos motivos da primeira:
+       Esc fecha, o foco fica preso dentro, o fundo escurece e o
+       leitor de tela entende — tudo de graça, do navegador.
+       O conteúdo dela nasce vazio porque quem escreve a lista é
+       o JavaScript, toda vez que ela abre (procure "A SACOLA" lá
+       embaixo, no script).
+       ======================================================== -->
+  <dialog class="janela janela-sacola" id="janela-sacola" aria-labelledby="sacola-titulo">
+    <button class="janela-fechar" type="button" aria-label="Fechar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5 5 6.4l5.6 5.6L5 17.6 6.4 19l5.6-5.6 5.6 5.6 1.4-1.4-5.6-5.6L19 6.4 17.6 5 12 10.6 6.4 5Z"/></svg>
+    </button>
+    <div class="janela-conteudo" id="sacola-conteudo"></div>
   </dialog>
 
   <div class="aviso-copia" id="aviso-copia" role="status" aria-live="polite"></div>
@@ -2181,6 +2379,30 @@ const produtos = [...grade.querySelectorAll('.card')].map((el) => {
   verDetalhes.textContent = 'Ver detalhes';
   verDetalhes.addEventListener('click', abrir);
   el.querySelector('.preco').before(verDetalhes);
+
+  /* O BOTÃO "ADICIONAR À SACOLA" DO CARD.
+     Ele nasce aqui no JavaScript, como o "Copiar link" — e não
+     escrito no HTML — por dois motivos que andam juntos: sem JS a
+     sacola inteira não existe (um botão parado ali seria só
+     decepção), e o bloco que você copia pra criar produto novo
+     continua do tamanho que sempre foi.
+
+     E o produto com MAIS DE UM TAMANHO é resolvido do jeito
+     honesto: o card não sabe qual pote a cliente quer, então
+     nele o botão ABRE A PÁGINA do produto — onde os tamanhos
+     estão — em vez de chutar um. Chutar o primeiro parecia
+     inofensivo, mas punha na sacola um pote que ninguém
+     escolheu. É o mesmo cuidado do escolherTamanho, visto do
+     outro lado do balcão. */
+  const botaoSacolaCard = document.createElement('button');
+  botaoSacolaCard.type = 'button';
+  botaoSacolaCard.className = 'botao botao-sacola';
+  botaoSacolaCard.textContent = 'Adicionar à sacola';
+  botaoSacolaCard.addEventListener('click', () => {
+    if (tamanhos.length > 1) abrir();
+    else adicionarNaSacola(el.id, tamanhos[0] || null);
+  });
+  el.querySelector('.botao').after(botaoSacolaCard);
 
   return {
     el,
@@ -2748,7 +2970,7 @@ function montarGaleria(p) {
 
 /* OS BOTÕES DE TAMANHO NA PÁGINA DO PRODUTO.
 
-   Escolher um tamanho muda QUATRO coisas de uma vez, e é por isso
+   Escolher um tamanho muda CINCO coisas de uma vez, e é por isso
    que tudo isso mora numa função só: se cada pedaço se
    atualizasse por conta própria, um dia um deles ia ficar pra
    trás — e o pior deles seria o link do WhatsApp, porque aí a
@@ -2757,7 +2979,8 @@ function montarGaleria(p) {
      1. a galeria (cada pote tem foto própria, se existir)
      2. a linha "Conteúdo"
      3. o preço, quando cada tamanho tem o seu
-     4. a mensagem do WhatsApp                                  */
+     4. a mensagem do WhatsApp
+     5. o botão da sacola, que guarda o pote escolhido          */
 function montarTamanhos(p, aoEscolher) {
   if (p.tamanhos.length < 2) return null;
 
@@ -2806,13 +3029,46 @@ function montarJanela(p) {
 
   const acoes = document.createElement('div');
   acoes.className = 'janela-acoes';
-  const zap = copia('.botao');            // já vem com o link do WhatsApp pronto
+  // O ".botao-cheio" no seletor não é preciosismo: o card agora
+  // tem DOIS botões com a classe .botao (o "Quero esse" e o da
+  // sacola), e um ".botao" sozinho copiaria o primeiro que
+  // encontrasse — hoje daria certo por sorte, e sorte não é
+  // fundação.
+  const zap = copia('.botao-cheio');      // o "Quero esse", já com o link pronto
+
+  /* O TAMANHO ESCOLHIDO fica anotado aqui fora porque DOIS botões
+     precisam dele: o "Quero esse", que o escolherTamanho já
+     atualiza na hora, e o da sacola, que só lê a anotação no
+     momento do clique. */
+  let tamanhoEscolhido = p.tamanhos[0] || null;
+
+  const botaoSacola = document.createElement('button');
+  botaoSacola.type = 'button';
+  botaoSacola.className = 'botao botao-sacola';
+  botaoSacola.addEventListener('click', () => {
+    adicionarNaSacola(p.id, tamanhoEscolhido);
+    refletirSacola();
+  });
+  /* AQUI O BOTÃO É O PRÓPRIO AVISO. O toastzinho ("Foi pra
+     sacola 🛍️") não aparece dentro desta janela: o <dialog>
+     mora numa camada do navegador que fica por cima de TUDO,
+     inclusive dele. Então é o botão que muda de figura — vira
+     "Está na sacola ✓" e trava — o que, de quebra, também
+     explica por que apertar de novo não faz nada. Trocou pra um
+     tamanho que ainda não está lá? Ele desperta de novo. */
+  function refletirSacola() {
+    const jaTem = estaNaSacola(p.id, tamanhoEscolhido ? tamanhoEscolhido.apelido : null);
+    botaoSacola.textContent = jaTem ? 'Está na sacola ✓' : 'Adicionar à sacola';
+    botaoSacola.disabled = jaTem;
+  }
+  refletirSacola();
+
   const link = document.createElement('button');
   link.type = 'button';
   link.className = 'compartilhar';
   link.innerHTML = el.querySelector('.compartilhar').innerHTML;
   link.addEventListener('click', () => copiarLink(p.id, p.nome));
-  acoes.append(zap, link);
+  acoes.append(zap, botaoSacola, link);
 
   const galeria = montarGaleria(p);
   const preco = copia('.preco');
@@ -2841,6 +3097,9 @@ function montarJanela(p) {
     if (blocoConteudo) blocoConteudo.querySelector('p').textContent = t.rotulo;
     // E o mais importante: a mensagem do WhatsApp
     zap.href = mensagemDoProduto(p.id, p.nome, t);
+    // ...e a anotação que o botão da sacola lê na hora do clique
+    tamanhoEscolhido = t;
+    refletirSacola();
   }
 
   const seletor = montarTamanhos(p, escolherTamanho);
@@ -2959,6 +3218,334 @@ window.addEventListener('popstate', (e) => {
   }
 });
 
+/* ---------- A SACOLA ----------
+   A cliente que queria três produtos mandava três mensagens — ou
+   voltava três vezes pro site. A sacola junta tudo e manda numa
+   mensagem só, com o link de cada produto dentro, e o caixa
+   continua sendo o de sempre: a conversa no WhatsApp.
+
+   O que fica guardado é o MÍNIMO: o id do produto e o apelido do
+   tamanho ("50ml"). Nome, preço e foto são procurados na hora de
+   mostrar, direto nos cards da página. Guardar nome e preço
+   junto criaria duas verdades — a da sacola e a do site — e duas
+   verdades sempre acabam discordando; assim, produto que mudou de
+   preço aparece com o preço novo, e produto que saiu do site
+   simplesmente sai da sacola. */
+
+const janelaSacola = document.getElementById('janela-sacola');
+const sacolaConteudo = document.getElementById('sacola-conteudo');
+const sacolaFlutuante = document.getElementById('sacola-flutuante');
+const sacolaContagem = document.getElementById('sacola-contagem');
+
+/* A MEMÓRIA DA SACOLA. O localStorage é um caderninho que o
+   navegador guarda por site: a cliente fecha a página, volta
+   amanhã, e a sacola continua esperando. Os try/catch não são
+   frescura — tem navegador (modo anônimo antigo, configurações
+   apertadas) que PROÍBE escrever no caderninho e estoura um erro.
+   Nesses, a sacola vive só enquanto a página está aberta, e o
+   resto do site nem fica sabendo: é o mesmo espírito do
+   history.pushState lá em cima. */
+const CHAVE_SACOLA = 'vitrine-sacola';
+let sacola = [];   // cada item: { id, tamanho } (tamanho = apelido ou null)
+try {
+  const guardada = JSON.parse(localStorage.getItem(CHAVE_SACOLA) || '[]');
+  if (Array.isArray(guardada)) {
+    // Item de produto que não existe mais é descartado calado
+    sacola = guardada.filter(item => item && produtos.some(p => p.id === item.id));
+  }
+} catch { /* sem caderninho: a sacola começa vazia */ }
+
+function guardarSacola() {
+  try { localStorage.setItem(CHAVE_SACOLA, JSON.stringify(sacola)); } catch { /* idem */ }
+}
+
+// Um item é o PAR produto + tamanho: o Jelly de 50 ml e o de
+// 110 ml são duas coisas na sacola, como devem ser.
+const estaNaSacola = (id, apelido) =>
+  sacola.some(i => i.id === id && (i.tamanho || null) === (apelido || null));
+
+/* E POR QUE NÃO TEM "2 unidades do mesmo"? Porque quantidade é
+   conversa: quem quer dois potes escreve "quero 2" no WhatsApp e
+   pronto. Botõezinhos de mais e menos, soma de quantidades,
+   quantidade dentro da mensagem... seria um bocado de código pra
+   poupar meia dúzia de letras digitadas — e este site inteiro
+   aposta que a conversa resolve melhor que o formulário. Então
+   adicionar de novo só avisa que já está lá. */
+function adicionarNaSacola(id, tamanho) {
+  const apelido = tamanho ? tamanho.apelido : null;
+  if (estaNaSacola(id, apelido)) {
+    mostrarAviso('Esse já está na sacola 😉');
+    return;
+  }
+  sacola.push({ id, tamanho: apelido });
+  guardarSacola();
+  atualizarSacola();
+  mostrarAviso('Foi pra sacola 🛍️');
+}
+
+/* O preço de UM item, com a mesma régua do card: o pote escolhido
+   manda; produto simples usa o preço dele; e quem não tem preço
+   devolve null — que aqui significa "sob consulta", nunca zero. */
+function precoDoItem(p, tamanho) {
+  if (tamanho) return tamanho.preco;
+  if (p.tamanhos.length) return null;
+  return p.preco;
+}
+
+/* A MENSAGEM DO PEDIDO — o motivo de a sacola existir. Um item
+   por linha, só com o nome (mais tamanho e preço, quando
+   existem), e UM link do site fechando a mensagem — o mesmo
+   desenho dos botões gerais, que sempre mandam "mensagem + link
+   do site".
+
+   Ela JÁ levou o link de cada produto embaixo de cada nome, e
+   ele saiu por decisão da dona (2026-08-19): três produtos
+   viravam três URLs compridas e a lista sumia no meio delas. E
+   faz sentido tirar: aquele link servia pra VOCÊ conferir qual
+   produto era — mas a lista já chega com nome e tamanho
+   escritos, e quem conhece os produtos de cor é você. Ficou a
+   lista limpinha e um link só, dizendo de onde o pedido veio.
+   (O link individual continua existindo no site: é o do "Copiar
+   link" e o do "Quero esse" de um produto só.)
+
+   O "Total" só entra quando TODOS os itens têm preço. Uma soma
+   parcial dentro da conversa ia parecer o valor do pedido — e
+   número errado na frente da cliente é pior que número nenhum. */
+function mensagemDaSacola(itens) {
+  const linhas = itens.map(({ p, tamanho, preco }) => {
+    const pedacos = [p.nome];
+    if (tamanho) pedacos.push(tamanho.rotulo);
+    if (preco) pedacos.push(emReais.format(preco));
+    return '• ' + pedacos.join(' — ');
+  });
+  let texto = 'Oi! Quero fazer um pedido 🛍️\n\n' + linhas.join('\n');
+  if (itens.length && itens.every(i => i.preco)) {
+    texto += '\n\nTotal: ' + emReais.format(itens.reduce((soma, i) => soma + i.preco, 0));
+  }
+  return linkZap(texto + '\n\n' + STORE_CONFIG.site);
+}
+
+/* TUDO QUE REFLETE A SACOLA NA TELA mora numa função só — o
+   botão flutuante (aparece, some, contagem, o nome que o leitor
+   de tela anuncia) e os botões dos cards, que viram "Está na
+   sacola ✓" quando o produto já entrou. É o mesmo argumento do
+   escolherTamanho: pedaço que se atualiza por conta própria um
+   dia fica pra trás. */
+function atualizarSacola() {
+  const n = sacola.length;
+  sacolaFlutuante.hidden = n === 0;
+  sacolaContagem.textContent = n;
+  sacolaFlutuante.setAttribute('aria-label',
+    n === 1 ? 'Abrir a sacola (1 item)' : `Abrir a sacola (${n} itens)`);
+
+  produtos.forEach(p => {
+    const botao = p.el.querySelector('.botao-sacola');
+    // Card de produto com vários tamanhos nunca trava: o botão
+    // dele abre a página, e lá dentro pode haver OUTRO tamanho
+    // ainda fora da sacola.
+    if (!botao || p.tamanhos.length > 1) return;
+    const jaTem = estaNaSacola(p.id, p.tamanhos[0] ? p.tamanhos[0].apelido : null);
+    botao.textContent = jaTem ? 'Está na sacola ✓' : 'Adicionar à sacola';
+    botao.disabled = jaTem;
+  });
+}
+
+/* DESENHAR A JANELA DA SACOLA. Ela é montada DO ZERO toda vez
+   que abre ou muda, igual à página do produto. Guardar pedaços
+   prontos e ir remendando seria mais "esperto" — e é assim que
+   nascem as telas que mostram item já apagado. Redesenhar tudo é
+   barato numa lista deste tamanho e impossível de sair de
+   sincronia. */
+function montarSacola() {
+  const titulo = document.createElement('h2');
+  titulo.id = 'sacola-titulo';
+  titulo.textContent = 'Sua sacola';
+
+  // Vazia, ela explica o que é e devolve a cliente pra vitrine.
+  // (Dá pra chegar aqui com ela vazia: basta esvaziar com a
+  // janela aberta. Fechar sozinha seria um susto — a tela some
+  // da mão sem ninguém pedir.)
+  if (!sacola.length) {
+    const vazio = document.createElement('div');
+    vazio.className = 'sacola-vazia';
+    const recado = document.createElement('p');
+    recado.textContent = 'Sua sacola está vazia. O que você adicionar pelos cards aparece aqui, prontinho pra pedir de uma vez. 🌷';
+    const voltar = document.createElement('button');
+    voltar.type = 'button';
+    voltar.className = 'botao botao-cheio';
+    voltar.textContent = 'Voltar pra vitrine';
+    voltar.addEventListener('click', () => janelaSacola.close());
+    vazio.append(recado, voltar);
+    sacolaConteudo.replaceChildren(titulo, vazio);
+    return;
+  }
+
+  const explica = document.createElement('p');
+  explica.className = 'sacola-explica';
+  explica.textContent = 'Confere a listinha e envia — o resto a gente combina na conversa.';
+
+  // Cada item guardado vira { produto, tamanho, preco } resolvidos
+  const itens = sacola.map(item => {
+    const p = produtos.find(x => x.id === item.id);
+    const tamanho = p.tamanhos.find(t => t.apelido === item.tamanho) || null;
+    return { item, p, tamanho, preco: precoDoItem(p, tamanho) };
+  });
+
+  const lista = document.createElement('ul');
+  lista.className = 'sacola-lista';
+  itens.forEach(({ item, p, tamanho, preco }) => {
+    const li = document.createElement('li');
+    li.className = 'sacola-item';
+
+    // A miniatura pega emprestada a foto que o card já baixou —
+    // custo zero de rede. Card sem foto deixa o quadradinho blush.
+    const thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    const fotoDoCard = p.el.querySelector('.moldura img');
+    if (fotoDoCard) {
+      const foto = document.createElement('img');
+      foto.src = fotoDoCard.getAttribute('src');
+      foto.alt = '';   // o nome do produto está escrito logo ao lado
+      thumb.appendChild(foto);
+    }
+
+    const info = document.createElement('div');
+    info.className = 'info';
+    const nome = document.createElement('div');
+    nome.className = 'nome';
+    nome.textContent = p.nome;
+    info.appendChild(nome);
+    // A linhazinha de baixo: tamanho e/ou preço, só o que existir
+    const pormenores = [tamanho && tamanho.rotulo, preco && emReais.format(preco)].filter(Boolean);
+    if (pormenores.length) {
+      const linha = document.createElement('div');
+      linha.className = 'pormenor';
+      linha.textContent = pormenores.join(' · ');
+      info.appendChild(linha);
+    }
+
+    const tirar = document.createElement('button');
+    tirar.type = 'button';
+    tirar.className = 'tirar';
+    // O aria-label diz O QUE o X tira — numa lista de vários X,
+    // "remover" solto não diz remover o quê.
+    tirar.setAttribute('aria-label', `Tirar ${p.nome} da sacola`);
+    tirar.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5 5 6.4l5.6 5.6L5 17.6 6.4 19l5.6-5.6 5.6 5.6 1.4-1.4-5.6-5.6L19 6.4 17.6 5 12 10.6 6.4 5Z"/></svg>';
+    tirar.addEventListener('click', () => {
+      sacola = sacola.filter(i => i !== item);
+      guardarSacola();
+      atualizarSacola();
+      montarSacola();   // redesenha a lista sem o item
+    });
+
+    li.append(thumb, info, tirar);
+    lista.appendChild(li);
+  });
+
+  // O rodapé da lista: esvaziar à esquerda, total à direita.
+  const rodape = document.createElement('div');
+  rodape.className = 'sacola-rodape';
+  const esvaziar = document.createElement('button');
+  esvaziar.type = 'button';
+  esvaziar.className = 'limpar';
+  esvaziar.textContent = 'Esvaziar a sacola';
+  esvaziar.addEventListener('click', () => {
+    sacola = [];
+    guardarSacola();
+    atualizarSacola();
+    montarSacola();
+  });
+  rodape.appendChild(esvaziar);
+
+  // A etiqueta do total diz a verdade sobre o que soma: se algum
+  // item ainda está "sob consulta", ela avisa que a conta é
+  // parcial em vez de fingir que é o valor do pedido.
+  const comPreco = itens.filter(i => i.preco);
+  if (comPreco.length) {
+    const soma = comPreco.reduce((total, i) => total + i.preco, 0);
+    const total = document.createElement('strong');
+    total.className = 'sacola-total';
+    total.textContent =
+      (comPreco.length === itens.length ? 'Total: ' : 'Já com preço: ') + emReais.format(soma);
+    rodape.appendChild(total);
+  }
+
+  const acoes = document.createElement('div');
+  acoes.className = 'janela-acoes';
+  const enviar = document.createElement('a');
+  enviar.className = 'botao botao-cheio';
+  enviar.href = mensagemDaSacola(itens);
+  enviar.textContent = 'Enviar pedido no WhatsApp';
+  acoes.appendChild(enviar);
+
+  // O "Continuar escolhendo" vem ANTES das ações no código de
+  // propósito: assim o botão grande fica sempre no pé da janela,
+  // grudado, que é onde o polegar espera o botão principal.
+  const continuar = document.createElement('button');
+  continuar.type = 'button';
+  continuar.className = 'ver-detalhes sacola-continuar';
+  continuar.textContent = 'Continuar escolhendo';
+  continuar.addEventListener('click', () => janelaSacola.close());
+
+  sacolaConteudo.replaceChildren(titulo, explica, lista, rodape, continuar, acoes);
+  sacolaConteudo.scrollTop = 0;
+}
+
+/* ABRIR, FECHAR E O BOTÃO VOLTAR. É a mesma dança da página do
+   produto, com as mesmas cicatrizes respeitadas: a janela abre
+   PRIMEIRO e o histórico muda depois (em arquivo local o
+   pushState estoura), e fechar pelo X chama o history.back() pra
+   deixar o histórico igualzinho ao de quem fechou pelo Voltar.
+
+   A diferença é que a sacola NÃO escreve nada na barra de
+   endereço: ninguém compartilha um link da própria sacola. O
+   degrau no histórico existe por um único motivo — no celular,
+   voltar é o gesto de sair de uma tela, e sem o degrau o Voltar
+   levava a cliente embora do site em vez de só fechar a janela. */
+let fechandoSacolaPeloHistorico = false;
+
+function abrirSacola(empilhar = true) {
+  montarSacola();
+  if (!janelaSacola.open) janelaSacola.showModal();
+  if (empilhar) {
+    try { history.pushState({ sacola: true }, ""); }
+    catch { /* arquivo local: segue sem o degrau, como a outra janela */ }
+  }
+}
+
+sacolaFlutuante.addEventListener('click', () => abrirSacola());
+
+janelaSacola.addEventListener('close', () => {
+  if (!fechandoSacolaPeloHistorico && history.state && history.state.sacola) {
+    history.back();
+  }
+  fechandoSacolaPeloHistorico = false;
+  // O foco volta pro botão de onde a janela saiu — a menos que a
+  // cliente tenha esvaziado a sacola, porque aí o botão nem
+  // existe mais na tela (foco em coisa escondida se perde).
+  if (!sacolaFlutuante.hidden) sacolaFlutuante.focus();
+});
+
+janelaSacola.querySelector('.janela-fechar').addEventListener('click', () => janelaSacola.close());
+
+// Clique no fundo escuro fecha — mesmo truque da outra janela
+janelaSacola.addEventListener('click', (e) => {
+  if (e.target === janelaSacola) janelaSacola.close();
+});
+
+// O pedaço do Voltar/Avançar que é da sacola. O ouvinte da página
+// do produto continua lá em cima, intacto: cada um cuida do SEU
+// degrau — um degrau tem a etiqueta {janela: ...} OU {sacola:
+// true}, nunca as duas — e um ouvinte ignora o degrau do outro.
+window.addEventListener('popstate', (e) => {
+  if (e.state && e.state.sacola) {
+    abrirSacola(false);
+  } else if (janelaSacola.open) {
+    fechandoSacolaPeloHistorico = true;
+    janelaSacola.close();
+  }
+});
+
 /* ---------- O QUE VEM DO STORE_CONFIG ---------- */
 
 // O nome da marca, no topo e no rodapé
@@ -3005,6 +3592,7 @@ document.getElementById('ano').textContent = new Date().getFullYear();
 montarCategorias();
 montarFinalidades();
 desenhar();
+atualizarSacola();   // acorda o flutuante se a sacola veio cheia de ontem
 lerURL(true);
 </script>
 
