@@ -346,7 +346,7 @@
 
        Ficou o flutuante, que é o melhor dos três: ele acompanha a
        rolagem em vez de existir só nos primeiros pixels. Os links
-       "A curadoria" e "Sobre" continuam acessíveis no rodapé; num
+       "Como eu escolho" e "Sobre" continuam acessíveis no rodapé; num
        celular a navegação de verdade é a vitrine, logo abaixo.
 
        No monitor grande nada disso muda: lá o menu tem espaço de
@@ -381,7 +381,7 @@
          menorzinhos, pra caber ao lado da logo numa linha só.
 
          Ele chegou a sumir daqui, e sumir foi um erro: sem menu, a
-         única forma de chegar em "A curadoria" e "Sobre" era rolar
+         única forma de chegar em "Como eu escolho" e "Sobre" era rolar
          a vitrine INTEIRA até o rodapé. Com 6 produtos dá pra
          aguentar. Com 40, aquelas duas seções viram lugares que
          ninguém mais visita.
@@ -399,8 +399,16 @@
     /* Telas bem estreitas (iPhone SE e parecidos): "Produtos" sai
        do menu. Ele é o link mais dispensável dos três — a vitrine
        começa logo abaixo do cabeçalho e o botão grande do hero já
-       leva pra lá. Os dois que apontam pra LONGE ficam. */
-    @media (max-width: 374px){
+       leva pra lá. Os dois que apontam pra LONGE ficam.
+
+       O limite era 374px, mas o iPhone SE tem exatamente 375 de
+       largura — o exemplo do comentário passava 1px por fora da
+       própria regra! Ninguém percebeu enquanto o link do meio se
+       chamava "A curadoria" (70px); quando ele virou "Como eu
+       escolho" (106px), a conta estourou a 375px e o menu quebrava
+       em duas linhas. Medido no navegador: com os três links, a
+       linha só fecha a partir de 380px. */
+    @media (max-width: 379px){
       .topo nav a[href="#catalogo"]{ display: none; }
     }
 
@@ -1735,7 +1743,14 @@
       </a>
       <nav aria-label="Navegação principal">
         <a href="#catalogo">Produtos</a>
-        <a href="#curadoria">A curadoria</a>
+        <!-- Esse link já se chamou "A curadoria" — palavra de quem
+             FAZ o site, não de quem compra. O nome do link deve
+             responder à pergunta da cliente ("como assim, você
+             escolhe?"), não à nossa. Repare que só o TEXTO mudou:
+             o id da seção continua #curadoria, porque mudar id
+             quebraria links já compartilhados por aí. Nome que
+             aparece e nome interno podem ser diferentes. -->
+        <a href="#curadoria">Como eu escolho</a>
         <a href="#sobre">Sobre</a>
       </nav>
     </div>
