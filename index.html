@@ -2071,8 +2071,13 @@ const produtos = [...grade.querySelectorAll('.card')].map((el) => {
   const descricao = el.querySelector('.descricao')?.textContent.trim() || "";
   const recomendacao = el.querySelector('.recomendacao')?.textContent.trim() || "";
 
-  // Preenche o que é derivado: marca, preço formatado e o link
-  // de WhatsApp com o nome do produto dentro da mensagem.
+  // Preenche o que é derivado: categoria, marca, preço formatado
+  // e o link de WhatsApp com o nome do produto dentro da mensagem.
+  // A etiqueta de categoria NASCE do data-categoria, igual aos
+  // filtros: quem copia um card e troca só o data-* não deixa a
+  // etiquetinha velha pra trás. (Escrita no HTML ela continua,
+  // mas só como reserva pra quando o JavaScript não roda.)
+  el.querySelector('.categoria-produto').textContent = rotular(el.dataset.categoria);
   el.querySelector('.marca-produto').textContent = marca;
 
   // PRODUTO SEM PREÇO AINDA.
@@ -2183,7 +2188,11 @@ const produtos = [...grade.querySelectorAll('.card')].map((el) => {
     nome,
     categoria: el.dataset.categoria,
     finalidades,
-    preco: temPreco ? valor : null,   // null = ainda sem preço definido
+    // O preço de ORDENAR é o mesmo que o card mostra: o do
+    // data-preco ou, quando são os tamanhos que têm preço, o
+    // mais barato deles. Sem isso, um produto "a partir de
+    // R$ 169" ia pro fim da fila como se não tivesse preço.
+    preco: temPreco ? valor : maisBarato,   // null = ainda sem preço definido
     destaque: el.dataset.destaque === "1",
     novo: el.dataset.novo === "1",
     tamanhos,
@@ -2426,22 +2435,46 @@ function urlDoProduto(id) {
 
 async function copiarLink(id, nome) {
   const url = urlDoProduto(id);          // o link público, pra mandar pra alguém
-  // Na barra de endereço a gente troca só a parte do "?produto=",
-  // sem mexer no domínio — senão o navegador reclama quando a
-  // página está aberta de outro lugar.
-  // O mesmo cuidado da janela: no arquivo local isto estoura, e
-  // antes o erro acontecia FORA do try — ou seja, derrubava o
-  // "Copiar link" inteiro antes mesmo de tentar copiar.
-  try {
-    history.replaceState({ produto: id }, "", '?produto=' + encodeURIComponent(id));
-  } catch { /* endereço travado: o link copiado continua certo */ }
+
+  // PLANO A: o jeito moderno de copiar.
   try {
     await navigator.clipboard.writeText(url);
     mostrarAviso("Link copiado 🌷");
-  } catch {
-    // Alguns navegadores não deixam copiar direto; então a gente
-    // pelo menos deixa o endereço na barra pra pessoa copiar.
+    return;
+  } catch { /* tem navegador que não deixa; segue pro plano B */ }
+
+  // PLANO B: o jeito antigo — uma caixinha invisível recebe o
+  // link, o site "seleciona tudo" e manda o comando de copiar,
+  // como se fosse a própria pessoa digitando Ctrl+C. Deselegante
+  // e confiável.
+  try {
+    const caixa = document.createElement('textarea');
+    caixa.value = url;
+    caixa.setAttribute('readonly', '');
+    caixa.style.position = 'fixed';
+    caixa.style.left = '-9999px';
+    document.body.appendChild(caixa);
+    caixa.select();
+    const copiou = document.execCommand('copy');
+    caixa.remove();
+    if (copiou) { mostrarAviso("Link copiado 🌷"); return; }
+  } catch { /* nem assim; resta o plano C */ }
+
+  // PLANO C: não deu pra copiar — então o link vai pra barra de
+  // endereço e a gente avisa. E repare: o site SÓ mexe na barra
+  // neste último caso. Uma versão antiga trocava o endereço em
+  // TODA cópia, e isso envenenava o histórico: copiar o link do
+  // produto A, abrir o produto B e fechar fazia o A abrir
+  // sozinho — o Voltar caía no endereço que a cópia tinha
+  // deixado pra trás.
+  try {
+    history.replaceState({ produto: id }, "", '?produto=' + encodeURIComponent(id));
     mostrarAviso("O link está na barra de endereço");
+  } catch {
+    // Arquivo local: nem a barra deixa trocar. A caixinha
+    // antiquada do navegador resolve — mostra o link já
+    // selecionado, pronto pro Ctrl+C.
+    prompt("Copie o link do produto:", url);
   }
 }
 
@@ -2592,7 +2625,16 @@ function montarGaleria(p) {
   const MAX_FOTOS = 6;
   const FILAS = 2;      // quantas fotos baixam ao mesmo tempo
 
+  /* A SENHA DA RODADA. Trocar de tamanho chama carregar() de novo
+     enquanto fotos da rodada anterior ainda podem estar no meio
+     do caminho — e foto atrasada, chegando DEPOIS da troca,
+     pintava a galeria com as imagens do tamanho errado. Cada
+     rodada ganha uma senha; foto que chega com senha velha é
+     recebida com um "obrigada, já foi" e mais nada. */
+  let geracao = 0;
+
   function carregar(tamanho) {
+    const minhaGeracao = ++geracao;   // a senha desta rodada
     const base = tamanho ? `${p.id}-${tamanho.apelido}` : p.id;
     const vagas = [];          // { botao, caminho } por posição
     let ultimaBoa = MAX_FOTOS; // até onde a galeria vai
@@ -2642,6 +2684,7 @@ function montarGaleria(p) {
       botao.appendChild(foto);
 
       foto.addEventListener('load', () => {
+        if (minhaGeracao !== geracao) return;   // foto de rodada velha
         vagas[posicao] = { botao };
         // A primeira foto também é a grande — e ela entra assim
         // que chega, cobrindo quem abriu pelo link do produto.
@@ -2659,6 +2702,7 @@ function montarGaleria(p) {
       // extensões, a vaga não existe: a galeria termina antes dela
       // e a fila para — ninguém procura a de número seguinte.
       foto.addEventListener('error', () => {
+        if (minhaGeracao !== geracao) return;   // pedido de rodada velha
         if (tentativa < EXTENSOES.length) {
           foto.src = `fotos/${base}${sufixo}.${EXTENSOES[tentativa++]}`;
           return;
@@ -2693,7 +2737,12 @@ function montarGaleria(p) {
     for (let i = 1; i <= FILAS; i++) proximaVaga(i);
   }
 
-  carregar(p.tamanhos[0] || null);
+  // Produto SEM tamanhos: a galeria já sai buscando as fotos.
+  // COM tamanhos, quem dá a partida é o escolherTamanho, lá no
+  // montarJanela — antes os DOIS davam a partida, e cada abertura
+  // baixava a galeria inteira duas vezes, repetindo até os
+  // pedidos de foto que não existe.
+  if (!p.tamanhos.length) carregar(null);
   return { elemento: galeria, trocar: carregar };
 }
 
@@ -2775,10 +2824,20 @@ function montarJanela(p) {
     if (t.preco) {
       preco.textContent = emReais.format(t.preco);
       preco.classList.remove('preco-consultar');
+    } else {
+      // Tamanho ainda sem preço: o campo diz isso na hora. Sem
+      // este else, o preço do tamanho ANTERIOR continuava na
+      // tela — e preço errado na frente da cliente é o pior
+      // defeito que uma vitrine pode ter.
+      preco.textContent = "Preço sob consulta";
+      preco.classList.add('preco-consultar');
     }
-    // A linha "Conteúdo" passa a dizer o tamanho escolhido
+    // A linha "Conteúdo" passa a dizer o tamanho escolhido. A
+    // comparação do título perdoa maiúscula, acento e espaço a
+    // mais — se um dia ele virar "Conteúdo (ml)", ainda acha.
+    // (O semAcento é a mesma ferramenta da busca, lá em cima.)
     const blocoConteudo = [...detalhe.querySelectorAll('.detalhe-bloco')]
-      .find(b => b.querySelector('h4')?.textContent === 'Conteúdo');
+      .find(b => semAcento(b.querySelector('h4')?.textContent || '').trim().startsWith('conteudo'));
     if (blocoConteudo) blocoConteudo.querySelector('p').textContent = t.rotulo;
     // E o mais importante: a mensagem do WhatsApp
     zap.href = mensagemDoProduto(p.id, p.nome, t);
@@ -2819,7 +2878,10 @@ function abrirJanela(p, mudarEndereco = true) {
 
   if (mudarEndereco) {
     try {
-      history.pushState({ produto: p.id }, "", '?produto=' + encodeURIComponent(p.id));
+      // A etiqueta {janela: ...} marca que foi a JANELA que
+      // empilhou este degrau — o popstate confere isso antes de
+      // reabrir qualquer coisa.
+      history.pushState({ janela: p.id }, "", '?produto=' + encodeURIComponent(p.id));
     } catch {
       /* endereço travado (arquivo local): segue sem ele */
     }
@@ -2866,11 +2928,28 @@ function lerURL(rolar) {
   const alvo = produtos.find(p => p.id === id);
   if (!alvo) return;
   abrirProduto(id, rolar);
-  abrirJanela(alvo, false);   // o endereço já é o do produto: não empilha de novo
+  abrirJanela(alvo, false);   // a janela abre primeiro, como sempre
+
+  // QUEM CHEGA PELO LINK COMPARTILHADO entra com a janela já
+  // aberta — mas o histórico precisa ficar IGUAL ao de quem
+  // abriu clicando no card: um degrau de base embaixo e o do
+  // produto em cima. Sem o degrau de base, o X e o Esc (que
+  // chamam history.back()) jogavam a pessoa pra FORA do site —
+  // de volta pro WhatsApp — em vez de só fechar a janela.
+  try {
+    history.replaceState(null, "", location.pathname);
+    history.pushState({ janela: id }, "", '?produto=' + encodeURIComponent(id));
+  } catch { /* arquivo local: segue sem o degrau, como antes */ }
 }
 
-window.addEventListener('popstate', () => {
-  const id = new URLSearchParams(location.search).get('produto');
+window.addEventListener('popstate', (e) => {
+  // Só REABRE a janela se o degrau do histórico tiver a etiqueta
+  // {janela: ...} — isto é, se foi a própria janela que empilhou
+  // ele. Um "?produto=" que chegou na barra por outro caminho (o
+  // plano C do copiarLink, por exemplo) não reabre nada: era
+  // isso que fazia o produto A abrir sozinho depois de copiar o
+  // link dele e passear por outro produto.
+  const id = e.state && e.state.janela;
   const alvo = id && produtos.find(p => p.id === id);
   if (alvo) {
     abrirJanela(alvo, false);
