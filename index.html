@@ -245,6 +245,43 @@
     }
     .pular:focus{ left: 0; top: 0; }
 
+    /* Palavras que SÓ o leitor de tela ouve.
+       Vão servir no preço em promoção: na tela, o preço antigo
+       aparece riscado e o novo em negrito — o risco EXPLICA
+       sozinho. Mas nem todo leitor de tela anuncia o risco, e aí
+       a pessoa ouviria dois preços seguidos sem saber qual vale.
+       Com um "de" e um "por" escondidos, ela ouve a frase
+       inteira: "de R$ 79,90 por R$ 59,90".
+       O truque: um elemento de 1px, cortado pelo clip-path, fora
+       do fluxo. Invisível pros olhos, presente pra quem ouve.
+       (display:none não serviria — esconderia dos dois.) */
+    .so-leitor{
+      position: absolute; width: 1px; height: 1px;
+      overflow: hidden; clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    /* ==========================================================
+       PARTE 2b — A BARRA DE ANÚNCIO (a fitinha do topo)
+       As lojas grandes de beleza abrem com uma faixa escura
+       anunciando a oferta do dia, antes mesmo do logotipo. A
+       nossa faz o mesmo trabalho — dar cara de loja logo na
+       chegada — anunciando o que é verdade AQUI: o pedido
+       acontece no WhatsApp.
+       Cacau com letra porcelana: 10.15 de contraste, a dupla
+       mais forte da casa. E ela NÃO fica grudada: aparece na
+       chegada e rola embora com a página — quem gruda é o
+       cabeçalho (no computador) e a fita de filtros (sempre). */
+    .anuncio{
+      background: var(--cacau); color: var(--porcelana);
+      text-align: center;
+      font-size: 13.5px; font-weight: 600; letter-spacing: .04em;
+      padding: 9px 16px;
+    }
+    @media (max-width: 640px){
+      .anuncio{ font-size: 12px; padding: 8px 12px; }
+    }
+
     /* ==========================================================
        PARTE 3 — CABEÇALHO
        ========================================================== */
@@ -442,6 +479,89 @@
         text-decoration-color: var(--rosa); text-underline-offset: 4px;
       }
       .hero .botao-vazado:hover{ background: transparent; color: var(--marrom-hover); }
+    }
+
+    /* ==========================================================
+       PARTE 4b — A PRATELEIRA DOS QUERIDINHOS
+       A vitrininha horizontal entre o hero e o catálogo, no
+       espírito das prateleiras "melhores ofertas do dia" das
+       lojas grandes: os produtos com data-destaque="1" ganham um
+       cartãozinho que leva direto pra página deles.
+
+       Ela nasce ESCONDIDA (hidden no HTML) e só aparece quando o
+       JavaScript encontra pelo menos um queridinho — hoje nenhum
+       produto está marcado, então a prateleira espera. Marcar os
+       queridinhos é decisão da dona do site, não nossa: no dia em
+       que ela escolher, é trocar o 0 por 1 e a prateleira acorda
+       sozinha, sem mexer em mais nada.                          */
+    .prateleira{ padding: 0 0 26px; }
+    .prateleira .titulo-secao{ font-size: clamp(22px, 3.4vw, 30px); margin-bottom: 2px; }
+    .prateleira .subtitulo-secao{ margin-bottom: 18px; }
+
+    /* A esteira: uma fileira que rola pro lado quando não cabe,
+       igualzinho à fita de categorias. O scroll-snap dá aquela
+       "assentada" de cada cartão no lugar quando a rolagem para. */
+    .esteira{
+      display: flex; gap: 16px;
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+      /* o respiro nas beiradas é pro pulinho do hover não ser
+         decapitado pelo overflow */
+      padding: 6px 6px 14px;
+      scrollbar-width: thin;
+    }
+
+    /* O cartãozinho é um <button> de verdade — o cartão INTEIRO
+       abre a página do produto, com teclado e tudo — então boa
+       parte disto é desfazer a roupa padrão de botão do
+       navegador (fundo cinza, fonte própria, letra no meio). */
+    .mini-card{
+      flex: 0 0 200px;
+      scroll-snap-align: start;
+      background: var(--branco);
+      border: 1px solid var(--blush);
+      border-radius: 18px;
+      padding: 10px 10px 16px;
+      font-family: inherit; text-align: center;
+      color: var(--tinta); cursor: pointer;
+      display: flex; flex-direction: column;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .mini-card:hover{
+      transform: translateY(-3px);
+      box-shadow: 0 12px 26px rgba(92, 46, 62, .12);
+    }
+    .mini-card .moldura{ margin-bottom: 10px; }
+    /* As letrinhas seguem o figurino dos cards grandes: marca em
+       caixa alta, nome na fonte elegante, preço em negrito —
+       todos em cacau sobre o branco do cartão (10.69 cheio;
+       o "sob consulta" com .8 dá 6.2, folga boa pra letra miúda). */
+    .mini-card .mini-marca{
+      font-size: 11px; font-weight: 600; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--cacau);
+      margin-bottom: 3px;
+    }
+    .mini-card .mini-nome{
+      font-family: 'Prata', serif; font-size: 15.5px; line-height: 1.3;
+      color: var(--cacau);
+      margin-bottom: 10px;
+    }
+    /* O margin-top:auto é o mesmo truque dos cards grandes: o
+       preço desce pro pé, e os cartões ficam alinhados entre si
+       mesmo com nomes de uma e de duas linhas. */
+    .mini-card .mini-preco{
+      margin-top: auto;
+      font-size: 15px; font-weight: 600; color: var(--cacau);
+    }
+    .mini-card .mini-preco.preco-consultar{
+      font-size: 13px; font-weight: 500; opacity: .8;
+    }
+    @media (max-width: 640px){
+      .prateleira{ padding-bottom: 14px; }
+      .esteira{ gap: 10px; }
+      .mini-card{ flex-basis: 156px; padding: 8px 8px 13px; }
+      .mini-card .mini-nome{ font-size: 13.5px; }
+      .mini-card .mini-preco{ font-size: 13.5px; }
     }
 
     /* ==========================================================
@@ -735,11 +855,17 @@
        forma de arco é a assinatura da casa. O inset desenha a
        linha por dentro, acompanhando a curva, sem empurrar nada
        de lugar (borda de verdade mudaria o tamanho da caixa). */
-    .card .moldura.com-foto{
+    /* O :is() é um atalho de seletor: ":is(.card, .mini-card) X"
+       vale por ".card X, .mini-card X" escrito duas vezes. Entrou
+       aqui quando a prateleira dos queridinhos nasceu: o
+       cartãozinho dela usa a MESMA moldura em arco dos cards, e
+       estas duas regras precisavam valer pros dois sem virar
+       copia-e-cola (que um dia alguém atualiza só de um lado). */
+    :is(.card, .mini-card) .moldura.com-foto{
       background: var(--branco);
       box-shadow: inset 0 0 0 1px var(--blush);
     }
-    .card .moldura.com-foto img{ object-fit: cover; padding: 0; }
+    :is(.card, .mini-card) .moldura.com-foto img{ object-fit: cover; padding: 0; }
     /* Enquanto não existe foto de verdade, um recadinho discreto.
 
        O .88 tem uma história: este recadinho é escrito por cima
@@ -770,16 +896,46 @@
       padding: 5px 12px; border-radius: 999px;
     }
 
-    .card .categoria-produto{
-      font-size: 12px; font-weight: 600; letter-spacing: .1em;
-      /* .78 e não .7: a categoria é letra MIÚDA (10.5px no
-         celular), e letra miúda apagada é a primeira a sumir.
-         Com .7 dava 4.49 — reprovava por um centésimo. */
-      text-transform: uppercase; color: var(--cacau); opacity: .78;
+    /* A tarjinha de DESCONTO ("-15%"), irmã gêmea da de
+       queridinho: mesma dupla cacau + porcelana (10.15, medida
+       que não depende da foto que estiver atrás), mesmo pé do
+       arco pelo mesmo motivo — a curva lá de cima morde os
+       cantos. Uma mora à esquerda, a outra à direita, então um
+       produto pode ser queridinho E estar em promoção sem as
+       duas brigarem por lugar. Quem faz a conta do desconto é o
+       JavaScript, a partir dos dois preços; ninguém digita
+       porcentagem. */
+    .selo-desconto{
+      position: absolute; bottom: 12px; right: 12px;
+      background: var(--cacau); color: var(--porcelana);
+      font-size: 11.5px; font-weight: 700; letter-spacing: .04em;
+      padding: 5px 10px; border-radius: 999px;
+    }
+
+    /* A MARCA EM CIMA, EM CAIXA ALTA — o figurino das lojas
+       grandes de beleza: primeiro a marca (TRUSS, EUCERIN...),
+       depois o nome do produto. Marca e categoria TROCARAM DE
+       LUGAR aqui: a categoria, que abria o card, desceu pra
+       baixo do nome e virou a linha discreta. Faz sentido — a
+       categoria já está dita duas vezes (na fita de filtros e na
+       cor do arco), enquanto a marca é informação nova.
+       Cacau cheio, sem opacidade: 10.69 no branco do card. É a
+       linha que mais trabalha pra dar "cara de loja", não é hora
+       de apagar ela. */
+    .card .marca-produto{
+      font-size: 12px; font-weight: 600; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--cacau);
       margin-bottom: 5px;
     }
     .card h3{ font-size: 19px; line-height: 1.3; margin-bottom: 4px; }
-    .card .marca-produto{ font-size: 13.5px; opacity: .75; margin-bottom: 6px; }
+    /* A categoria, agora coadjuvante, embaixo do nome. O .78 vem
+       da história antiga desta linha (com .7 a letra miúda
+       reprovava por um centésimo); no branco do card, cacau com
+       .78 dá 5.65 — passa com folga. */
+    .card .categoria-produto{
+      font-size: 12.5px; color: var(--cacau); opacity: .78;
+      margin-bottom: 6px;
+    }
     .card .descricao{ font-size: 14.5px; line-height: 1.5; }
 
     /* A RECOMENDAÇÃO DA YASMIN — é o coração do site.
@@ -811,6 +967,20 @@
        com o mesmo corpo e peso de um número, ia gritar mais alto
        que os preços de verdade dos outros cards. */
     .card .preco-consultar{ font-size: 15px; font-weight: 500; opacity: .8; }
+
+    /* O PREÇO EM PROMOÇÃO, do jeito que toda loja mostra: o de
+       antes riscado em cima, o de agora embaixo, no tamanho e
+       peso de sempre. O riscado usa o <s> — o elemento HTML que
+       EXISTE pra "isto não vale mais" — em tinta com .75 (5.32
+       no branco do card: apagadinho como convém a preço morto,
+       legível como convém a letra pequena).
+       O display:block é o que põe um em cima do outro sem
+       precisar de caixa nenhuma em volta. */
+    .preco .preco-de{
+      display: block;
+      font-size: 13.5px; font-weight: 500;
+      color: var(--tinta); opacity: .75;
+    }
     .card .botao{ padding: 11px 24px; font-size: 15px; align-self: center; }
 
     /* O link de compartilhar, discretinho no pé do card */
@@ -842,12 +1012,23 @@
       .grade{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
       .card{ padding: 10px 10px 16px; border-radius: 18px; }
       .card h3{ font-size: 15.5px; }
-      .card .categoria-produto{ font-size: 10.5px; }
+      .card .marca-produto{ font-size: 10.5px; }
+      .card .categoria-produto{ font-size: 11px; }
       .card .descricao{ font-size: 12.5px; }
+      .card .preco .preco-de{ font-size: 12px; }
       .card .recomendacao{ font-size: 12.5px; padding: 10px 11px; border-radius: 12px; }
       .card .preco{ font-size: 16px; padding-top: 10px; margin-bottom: 10px; }
       .card .botao{ align-self: stretch; padding: 10px 8px; font-size: 14px; }
       .selo{ font-size: 10px; padding: 4px 9px; bottom: 8px; left: 8px; }
+      .selo-desconto{ font-size: 10px; padding: 4px 8px; bottom: 8px; right: 8px; }
+      /* Queridinho E desconto no MESMO arco: no card estreito do
+         celular os dois não cabem lado a lado (num aparelho de
+         320px eles chegavam a se sobrepor). Quando é o caso, o
+         desconto sobe um andar. O :has() é o seletor que faz a
+         pergunta "para trás": "este arco TEM a tarjinha de
+         queridinho dentro?" — coisa que seletor nenhum conseguia
+         perguntar antes de ele existir. */
+      .moldura:has(.selo) .selo-desconto{ bottom: 40px; right: 8px; }
       .moldura{ margin-bottom: 12px; }
       /* a descrição para em 2 linhas: com 6 cards lado a lado num
          celular, textos de tamanhos diferentes deixavam a grade
@@ -1227,20 +1408,28 @@
       opacity: .78; margin-top: 6px;
     }
 
-    .janela .categoria-produto{
-      font-size: 12px; font-weight: 600; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--cacau); opacity: .78;
+    /* Na janela a marca e a categoria trocaram de lugar e de
+       figurino JUNTO com os cards (a explicação mora lá na
+       PARTE 7): marca em caixa alta abrindo, categoria de
+       coadjuvante embaixo do nome. */
+    .janela .marca-produto{
+      font-size: 12.5px; font-weight: 600; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--cacau);
       margin-bottom: 6px;
     }
-    .janela h2{ font-size: 26px; line-height: 1.2; margin-bottom: 4px; }
-    .janela .marca-produto{ font-size: 15px; opacity: .8; margin-bottom: 10px; }
     .janela .marca-produto:empty{ display: none; }
+    .janela h2{ font-size: 26px; line-height: 1.2; margin-bottom: 4px; }
+    .janela .categoria-produto{
+      font-size: 14px; color: var(--cacau); opacity: .78;
+      margin-bottom: 10px;
+    }
     .janela .descricao{ font-size: 16px; margin-bottom: 14px; }
     .janela .preco{
       font-size: 24px; font-weight: 600; color: var(--cacau);
       margin: 0 0 16px;
     }
     .janela .preco-consultar{ font-size: 17px; font-weight: 500; opacity: .8; }
+    .janela .preco .preco-de{ font-size: 15px; }
     .janela .recomendacao{
       font-style: italic; font-size: 15.5px; line-height: 1.6;
       color: var(--cacau); background: var(--blush);
@@ -1514,6 +1703,17 @@
   <a class="pular" href="#catalogo">Pular para os produtos</a>
 
   <!-- ========================================================
+       A BARRA DE ANÚNCIO
+       A faixinha escura antes de tudo, como nas lojas grandes.
+
+       TROQUE AQUI — o recado do topo. Hoje ele conta como a
+       loja funciona; quando você tiver uma promoção, um cupom
+       ou uma condição de entrega pra anunciar, é AQUI que se
+       anuncia ("Frete grátis em Goiânia essa semana!").
+       ======================================================== -->
+  <div class="anuncio">Escolha, junte na sacola e envie o pedido pelo WhatsApp</div>
+
+  <!-- ========================================================
        CABEÇALHO
        ======================================================== -->
   <header class="topo">
@@ -1553,6 +1753,25 @@
         <p>Uma seleção de produtos de beleza que eu compraria de novo — do jeitinho que eu indicaria para uma amiga.</p>
         <a class="botao botao-cheio" href="#catalogo">Ver todos os produtos</a>
         <a class="botao botao-vazado" href="#falar" data-zap="Oi! Vim pelo site e queria conversar sobre os produtos.">Falar comigo</a>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         A PRATELEIRA DOS QUERIDINHOS
+         Nasce escondida (repare no hidden) e é o JavaScript
+         quem a acorda, SE existir produto com data-destaque="1".
+         Hoje nenhum tem — a prateleira está pronta, esperando
+         você escolher os seus queridinhos lá nos produtos.
+         A esteira nasce vazia como as fitas de filtro, e pelo
+         mesmo motivo: os cartõezinhos são montados a partir dos
+         produtos de verdade, então nunca sobra queridinho
+         apontando pra produto que não existe.
+         ====================================================== -->
+    <section class="prateleira so-com-js" id="queridinhos" aria-labelledby="titulo-queridinhos" hidden>
+      <div class="container">
+        <h2 class="titulo-secao" id="titulo-queridinhos">Os queridinhos</h2>
+        <p class="subtitulo-secao">Os produtos que eu mais indico.</p>
+        <div class="esteira" id="esteira-queridinhos"></div>
       </div>
     </section>
 
@@ -1638,7 +1857,13 @@
              │                     VÁRIAS, separadas por espaço│
              │   data-marca      → deixe vazio se não souber   │
              │   data-preco      → só o número: 79.90          │
-             │   data-destaque   → 1 vira "queridinho"         │
+             │   data-preco-de   → o preço de ANTES da        │
+             │                     promoção: risca o velho e   │
+             │                     ganha o selo de desconto    │
+             │                     (não vale com tamanhos)     │
+             │   data-destaque   → 1 vira "queridinho" e põe   │
+             │                     o produto na prateleira     │
+             │                     lá do alto                  │
              │   data-novo       → 1 entra em "Novidades"      │
              │   data-tamanhos   → SÓ se o produto vier em     │
              │                     mais de um tamanho. Veja    │
@@ -1715,9 +1940,9 @@
             <div class="moldura">
               <span class="sem-foto">foto do produto</span>
             </div>
-            <p class="categoria-produto">Pele</p>
+            <p class="marca-produto">Medicube</p>
             <h3>Zero Pore Pad</h3>
-            <p class="marca-produto"></p>
+            <p class="categoria-produto">Pele</p>
             <p class="descricao">Tônico em discos com AHA, BHA e pantenol. 70 unidades (155 g).</p>
             <!-- TROQUE AQUI: a sua recomendação, em primeira pessoa.
                  Ela aparece no card E na página do produto.
@@ -1764,9 +1989,9 @@
             <div class="moldura">
               <span class="sem-foto">foto do produto</span>
             </div>
-            <p class="categoria-produto">Pele</p>
+            <p class="marca-produto">Medicube</p>
             <h3>Sérum PDRN Pink Peptide</h3>
-            <p class="marca-produto"></p>
+            <p class="categoria-produto">Pele</p>
             <p class="descricao">Sérum com PDRN e complexo de 5 peptídeos. 30 ml.</p>
             <!-- TROQUE AQUI: a sua recomendação, em primeira pessoa.
                  Ela aparece no card E na página do produto.
@@ -1813,9 +2038,9 @@
             <div class="moldura">
               <span class="sem-foto">foto do produto</span>
             </div>
-            <p class="categoria-produto">Pele</p>
+            <p class="marca-produto">Medicube</p>
             <h3>Creme PDRN Colágeno Rosa</h3>
-            <p class="marca-produto"></p>
+            <p class="categoria-produto">Pele</p>
             <p class="descricao">Creme em cápsulas de colágeno com PDRN e niacinamida. 55 g.</p>
             <!-- TROQUE AQUI: a sua recomendação, em primeira pessoa.
                  Ela aparece no card E na página do produto.
@@ -1868,9 +2093,9 @@
             <div class="moldura">
               <span class="sem-foto">foto do produto</span>
             </div>
-            <p class="categoria-produto">Pele</p>
+            <p class="marca-produto">Medicube</p>
             <h3>Collagen Night Wrapping Mask</h3>
-            <p class="marca-produto"></p>
+            <p class="categoria-produto">Pele</p>
             <p class="descricao">Máscara noturna peel-off de colágeno, com niacinamida e ceramida. 75 ml.</p>
             <!-- TROQUE AQUI: a sua recomendação, em primeira pessoa. -->
             <p class="recomendacao"></p>
@@ -1926,9 +2151,9 @@
             <div class="moldura">
               <span class="sem-foto">foto do produto</span>
             </div>
-            <p class="categoria-produto">Pele</p>
+            <p class="marca-produto">Medicube</p>
             <h3>Collagen Jelly Cream</h3>
-            <p class="marca-produto"></p>
+            <p class="categoria-produto">Pele</p>
             <p class="descricao">Creme hidratante em textura de gel, com colágeno.</p>
             <!-- TROQUE AQUI: a sua recomendação, em primeira pessoa. -->
             <p class="recomendacao"></p>
@@ -2304,12 +2529,72 @@ const produtos = [...grade.querySelectorAll('.card')].map((el) => {
   const maisBarato = precosDosTamanhos.length ? Math.min(...precosDosTamanhos) : null;
   const temPreco = Number.isFinite(valor) && valor > 0;
   const campoPreco = el.querySelector('.preco');
+
+  /* A PROMOÇÃO (o data-preco-de).
+     Só existe promoção quando os DOIS preços estão escritos e o
+     de antes é MAIOR que o de agora. Parece implicância, mas é
+     proteção: um "de R$ 50 por R$ 79" — dedo que trocou os
+     números — viraria propaganda enganosa na tela. Nesse caso o
+     card ignora o preço velho e mostra só o atual, que é o
+     comportamento inofensivo.
+     Produto com data-tamanhos fica de fora (o !tamanhos.length):
+     lá o preço mora em cada tamanho, e a janela redesenha o
+     campo a cada troca de pote — o risquinho seria apagado no
+     primeiro clique. Promoção de produto com tamanhos se faz
+     trocando o preço no próprio tamanho. */
+  const precoDe = parseFloat(el.dataset.precoDe);
+  const temPromocao = temPreco && !tamanhos.length &&
+                      Number.isFinite(precoDe) && precoDe > valor;
+
   if (maisBarato !== null) {
     campoPreco.textContent = "a partir de " + emReais.format(maisBarato);
     campoPreco.classList.remove('preco-consultar');
+  } else if (temPromocao) {
+    // O preço vira dois: o de antes riscado (no <s>, o elemento
+    // que existe pra "isto não vale mais") e o de agora por
+    // baixo, no peso de sempre. As palavrinhas "de"/"por" vão
+    // junto, invisíveis — só o leitor de tela ouve (procure
+    // .so-leitor lá no CSS pra entender o porquê).
+    const de = document.createElement('span');
+    de.className = 'so-leitor';
+    de.textContent = 'de ';
+    const velho = document.createElement('s');
+    velho.className = 'preco-de';
+    velho.textContent = emReais.format(precoDe);
+    const por = document.createElement('span');
+    por.className = 'so-leitor';
+    por.textContent = 'por ';
+    const atual = document.createElement('span');
+    atual.textContent = emReais.format(valor);
+    campoPreco.replaceChildren(de, velho, por, atual);
+    campoPreco.classList.remove('preco-consultar');
+
+    // E a tarjinha com a conta feita: -15%, -30%... O arredondar
+    // é pra tarjinha, não pro preço — os centavos continuam
+    // valendo nos números. Desconto que arredonda pra zero nem
+    // vira tarjinha: "-0%" só faria a cliente rir da loja.
+    const pct = Math.round((1 - valor / precoDe) * 100);
+    if (pct >= 1) {
+      const tarja = document.createElement('span');
+      tarja.className = 'selo-desconto';
+      tarja.textContent = `-${pct}%`;
+      el.querySelector('.moldura').appendChild(tarja);
+    }
   } else {
     campoPreco.textContent = temPreco ? emReais.format(valor) : "Preço sob consulta";
     campoPreco.classList.toggle('preco-consultar', !temPreco);
+  }
+
+  /* A TARJINHA DE QUERIDINHO. O CSS dela (.selo, lá na PARTE 7)
+     esperou paciente desde o começo do site — faltava alguém
+     criar o elemento. Agora é assim: marcou data-destaque="1",
+     o arco ganha a tarjinha E o produto entra na prateleira lá
+     do alto. Duas consequências de um atributo só. */
+  if (el.dataset.destaque === "1") {
+    const tarjinha = document.createElement('span');
+    tarjinha.className = 'selo';
+    tarjinha.textContent = 'Queridinho';
+    el.querySelector('.moldura').appendChild(tarjinha);
   }
 
   // Um aviso miúdo no card, pra quem está passando os olhos pela
@@ -2437,6 +2722,74 @@ const produtos = [...grade.querySelectorAll('.card')].map((el) => {
     ].join(" "))
   };
 });
+
+/* ---------- A PRATELEIRA DOS QUERIDINHOS ----------
+   A fileira de cartõezinhos entre o hero e o catálogo. Ela é
+   montada UMA vez, aqui, e de propósito não participa dos
+   filtros nem da busca: prateleira de loja não se esvazia
+   porque a cliente filtrou a vitrine — ela é o convite fixo,
+   com os produtos que a dona escolheu a dedo.
+
+   Cada cartão é um <button> que abre a página do produto — a
+   mesma janela, pelo mesmo caminho dos cards. E repare que sem
+   nenhum queridinho marcado a função vai embora cedinho, e a
+   seção continua com o hidden de nascença: prateleira vazia não
+   é prateleira, é constrangimento.                              */
+(function montarPrateleira() {
+  const secao = document.getElementById('queridinhos');
+  const esteira = document.getElementById('esteira-queridinhos');
+  const queridinhos = produtos.filter(p => p.destaque);
+  if (!secao || !esteira || !queridinhos.length) return;
+
+  queridinhos.forEach(p => {
+    const cartao = document.createElement('button');
+    cartao.type = 'button';
+    cartao.className = 'mini-card';
+
+    // A mesma moldura em arco dos cards, com o mesmo recadinho
+    // enquanto a foto não chega — o procurarFoto entende os dois.
+    const moldura = document.createElement('span');
+    moldura.className = 'moldura';
+    const recado = document.createElement('span');
+    recado.className = 'sem-foto';
+    recado.textContent = 'foto do produto';
+    moldura.appendChild(recado);
+
+    const marquinha = document.createElement('span');
+    marquinha.className = 'mini-marca';
+    marquinha.textContent = p.el.dataset.marca || '';
+
+    const nome = document.createElement('span');
+    nome.className = 'mini-nome';
+    nome.textContent = p.nome;
+
+    // O preço repete a regra dos cards: com tamanhos é "a partir
+    // de", sem preço nenhum é "sob consulta" — nunca em branco,
+    // pra prateleira não parecer enfeite sem compromisso.
+    const preco = document.createElement('span');
+    preco.className = 'mini-preco';
+    if (p.preco !== null) {
+      preco.textContent = (p.tamanhos.length > 1 ? 'a partir de ' : '') + emReais.format(p.preco);
+    } else {
+      preco.textContent = 'sob consulta';
+      preco.classList.add('preco-consultar');
+    }
+
+    cartao.append(moldura, marquinha, nome, preco);
+    cartao.addEventListener('click', () => {
+      // Anota quem abriu, pro foco voltar pra cá quando fechar —
+      // a mesma cortesia de teclado que os cards fazem.
+      quemAbriuAJanela = cartao;
+      abrirJanela(p);
+    });
+    // A foto do cartão é o MESMO arquivo da foto do card, então o
+    // navegador baixa uma vez e usa duas.
+    procurarFoto(cartao, p.tamanhos.length ? `${p.id}-${p.tamanhos[0].apelido}` : p.id, p.nome);
+    esteira.appendChild(cartao);
+  });
+
+  secao.hidden = false;
+})();
 
 /* ---------- O ESTADO ----------
    Uma caixinha só com "o que a cliente escolheu". Qualquer
@@ -3115,9 +3468,11 @@ function montarJanela(p) {
   if (seletor && detalhe) detalhe.prepend(seletor);
   if (p.tamanhos.length) escolherTamanho(p.tamanhos[0]);
 
+  // A ordem acompanha a dos cards: marca em cima, nome, e a
+  // categoria de coadjuvante logo abaixo.
   janelaConteudo.replaceChildren(
-    ...[galeria.elemento, copia('.categoria-produto'), titulo,
-        copia('.marca-produto'), copia('.descricao'), preco,
+    ...[galeria.elemento, copia('.marca-produto'), titulo,
+        copia('.categoria-produto'), copia('.descricao'), preco,
         copia('.recomendacao'), detalhe, acoes].filter(Boolean)
   );
   janelaConteudo.scrollTop = 0;
